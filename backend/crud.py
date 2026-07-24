@@ -1874,3 +1874,571 @@ def model_validation(db):
         )
 
     }
+# =====================================================
+# MILESTONE 3
+# Advanced Revenue Analytics
+# =====================================================
+
+def advanced_revenue_analytics(db: Session, vendor_id: int):
+
+    from datetime import datetime, timedelta
+
+    now = datetime.utcnow()
+
+    current_period_start = now - timedelta(days=30)
+    previous_period_start = now - timedelta(days=60)
+
+    # -------------------------------------------------
+    # Total Revenue
+    # -------------------------------------------------
+
+    total_revenue = (
+        db.query(func.sum(models.Transaction.total_amount))
+        .filter(models.Transaction.vendor_id == vendor_id)
+        .scalar()
+    ) or 0
+
+    # -------------------------------------------------
+    # Total Transactions
+    # -------------------------------------------------
+
+    total_transactions = (
+        db.query(models.Transaction)
+        .filter(models.Transaction.vendor_id == vendor_id)
+        .count()
+    )
+
+    # -------------------------------------------------
+    # Total Units Sold
+    # -------------------------------------------------
+
+    total_units_sold = (
+        db.query(func.sum(models.Transaction.quantity))
+        .filter(models.Transaction.vendor_id == vendor_id)
+        .scalar()
+    ) or 0
+
+    # -------------------------------------------------
+    # Average Transaction Value
+    # -------------------------------------------------
+
+    average_transaction_value = (
+        total_revenue / total_transactions
+        if total_transactions > 0
+        else 0
+    )
+
+    # -------------------------------------------------
+    # Current 30 Days Revenue
+    # -------------------------------------------------
+
+    current_revenue = (
+        db.query(func.sum(models.Transaction.total_amount))
+        .filter(
+            models.Transaction.vendor_id == vendor_id,
+            models.Transaction.transaction_date >= current_period_start
+        )
+        .scalar()
+    ) or 0
+
+    # -------------------------------------------------
+    # Previous 30 Days Revenue
+    # -------------------------------------------------
+
+    previous_revenue = (
+        db.query(func.sum(models.Transaction.total_amount))
+        .filter(
+            models.Transaction.vendor_id == vendor_id,
+            models.Transaction.transaction_date >= previous_period_start,
+            models.Transaction.transaction_date < current_period_start
+        )
+        .scalar()
+    ) or 0
+
+    # -------------------------------------------------
+    # Revenue Growth
+    # -------------------------------------------------
+
+    if previous_revenue > 0:
+
+        revenue_growth = (
+            (current_revenue - previous_revenue)
+            / previous_revenue
+        ) * 100
+
+    else:
+        revenue_growth = 0
+
+    # -------------------------------------------------
+    # Product Performance
+    # -------------------------------------------------
+
+    product_performance = (
+        db.query(
+            models.Product.id.label("product_id"),
+            models.Product.product_name.label("product_name"),
+            func.sum(models.Transaction.quantity).label("units_sold"),
+            func.sum(models.Transaction.total_amount).label("revenue")
+        )
+        .join(
+            models.Transaction,
+            models.Transaction.product_id == models.Product.id
+        )
+        .filter(models.Product.vendor_id == vendor_id)
+        .group_by(
+            models.Product.id,
+            models.Product.product_name
+        )
+        .all()
+    )
+
+    # -------------------------------------------------
+    # Top Selling Product
+    # -------------------------------------------------
+
+    top_selling_product = None
+
+    if product_performance:
+
+        top_selling = max(
+            product_performance,
+            key=lambda x: x.units_sold or 0
+        )
+
+        top_selling_product = {
+            "product_name": top_selling.product_name,
+            "units_sold": int(top_selling.units_sold or 0)
+        }
+
+    # -------------------------------------------------
+    # Top Revenue Product
+    # -------------------------------------------------
+
+    top_revenue_product = None
+
+    if product_performance:
+
+        top_revenue = max(
+            product_performance,
+            key=lambda x: x.revenue or 0
+        )
+
+        top_revenue_product = {
+            "product_name": top_revenue.product_name,
+            "revenue": round(float(top_revenue.revenue or 0), 2)
+        }
+
+    # -------------------------------------------------
+    # Category Performance
+    # -------------------------------------------------
+
+    categories = (
+        db.query(
+            models.Product.category.label("category"),
+            func.sum(models.Transaction.total_amount).label("revenue"),
+            func.sum(models.Transaction.quantity).label("units_sold")
+        )
+        .join(
+            models.Transaction,
+            models.Transaction.product_id == models.Product.id
+        )
+        .filter(models.Product.vendor_id == vendor_id)
+        .group_by(models.Product.category)
+        .order_by(
+            func.sum(models.Transaction.total_amount).desc()
+        )
+        .all()
+    )
+
+    category_performance = [
+        {
+            "category": item.category,
+            "revenue": round(float(item.revenue or 0), 2),
+            "units_sold": int(item.units_sold or 0)
+        }
+        for item in categories
+    ]
+
+    top_category = (
+        category_performance[0]["category"]
+        if category_performance
+        else "N/A"
+    )
+
+    # -------------------------------------------------
+    # Daily Revenue
+    # -------------------------------------------------
+
+    daily_sales = (
+        db.query(
+            func.date(
+                models.Transaction.transaction_date
+            ).label("date"),
+            func.sum(
+                models.Transaction.total_amount
+            ).label("revenue")
+        )
+        .filter(models.Transaction.vendor_id == vendor_id)
+        .group_by(
+            func.date(models.Transaction.transaction_date)
+        )
+        .order_by(
+            func.date(models.Transaction.transaction_date)
+        )
+        .all()
+    )
+
+    revenue_trend = [
+        {
+            "date": str(item.date),
+            "revenue": round(float(item.revenue or 0), 2)
+        }
+        for item in daily_sales
+    ]
+
+    # -------------------------------------------------
+    # Final Response
+    # -------------------------------------------------
+
+    return {
+
+        "summary": {
+            "total_revenue": round(float(total_revenue), 2),
+            "total_transactions": total_transactions,
+            "total_units_sold": int(total_units_sold),
+            "average_transaction_value":
+                round(float(average_transaction_value), 2)
+        },
+
+        "growth": {
+            "current_30_days":
+                round(float(current_revenue), 2),
+
+            "previous_30_days":
+                round(float(previous_revenue), 2),
+
+            "growth_percentage":
+                round(float(revenue_growth), 2)
+        },
+
+        "top_selling_product": top_selling_product,
+
+        "top_revenue_product": top_revenue_product,
+
+        "top_category": top_category,
+
+        "category_performance": category_performance,
+
+        "revenue_trend": revenue_trend
+    }
+# =====================================================
+# MILESTONE 3
+# Marketplace Vendor Benchmarking
+# =====================================================
+
+def marketplace_benchmark(db: Session, vendor_id: int):
+
+    # -------------------------------------------------
+    # Check vendor
+    # -------------------------------------------------
+
+    vendor = (
+        db.query(models.Vendor)
+        .filter(models.Vendor.id == vendor_id)
+        .first()
+    )
+
+    if not vendor:
+        return {
+            "error": "Vendor not found"
+        }
+
+    # -------------------------------------------------
+    # Vendor Revenue
+    # -------------------------------------------------
+
+    vendor_revenue = (
+        db.query(
+            func.sum(models.Transaction.total_amount)
+        )
+        .filter(
+            models.Transaction.vendor_id == vendor_id
+        )
+        .scalar()
+    ) or 0
+
+    # -------------------------------------------------
+    # Vendor Units Sold
+    # -------------------------------------------------
+
+    vendor_units = (
+        db.query(
+            func.sum(models.Transaction.quantity)
+        )
+        .filter(
+            models.Transaction.vendor_id == vendor_id
+        )
+        .scalar()
+    ) or 0
+
+    # -------------------------------------------------
+    # Vendor Transactions
+    # -------------------------------------------------
+
+    vendor_transactions = (
+        db.query(models.Transaction)
+        .filter(
+            models.Transaction.vendor_id == vendor_id
+        )
+        .count()
+    )
+
+    # -------------------------------------------------
+    # Get all approved vendors
+    # -------------------------------------------------
+
+    vendors = (
+        db.query(models.Vendor)
+        .filter(models.Vendor.status == "Approved")
+        .all()
+    )
+
+    # If your database stores "approved" instead of
+    # "Approved", change the value above accordingly.
+
+    # -------------------------------------------------
+    # Calculate every vendor's performance
+    # -------------------------------------------------
+
+    vendor_performance = []
+
+    for item in vendors:
+
+        revenue = (
+            db.query(
+                func.sum(models.Transaction.total_amount)
+            )
+            .filter(
+                models.Transaction.vendor_id == item.id
+            )
+            .scalar()
+        ) or 0
+
+        units = (
+            db.query(
+                func.sum(models.Transaction.quantity)
+            )
+            .filter(
+                models.Transaction.vendor_id == item.id
+            )
+            .scalar()
+        ) or 0
+
+        transactions = (
+            db.query(models.Transaction)
+            .filter(
+                models.Transaction.vendor_id == item.id
+            )
+            .count()
+        )
+
+        vendor_performance.append({
+            "vendor_id": item.id,
+            "business_name": item.business_name,
+            "revenue": float(revenue),
+            "units_sold": int(units),
+            "transactions": transactions
+        })
+
+    # -------------------------------------------------
+    # Handle no approved vendors
+    # -------------------------------------------------
+
+    total_vendors = len(vendor_performance)
+
+    if total_vendors == 0:
+
+        return {
+            "vendor_id": vendor_id,
+            "business_name": vendor.business_name,
+
+            "vendor_revenue": round(
+                float(vendor_revenue), 2
+            ),
+
+            "marketplace_average_revenue": 0,
+
+            "performance_percentage": 0,
+
+            "vendor_units_sold": int(vendor_units),
+
+            "marketplace_average_units": 0,
+
+            "vendor_transactions": vendor_transactions,
+
+            "marketplace_average_transactions": 0,
+
+            "revenue_rank": 0,
+
+            "total_vendors": 0,
+
+            "market_share_percentage": 0,
+
+            "leaderboard": []
+        }
+
+    # -------------------------------------------------
+    # Marketplace Totals
+    # -------------------------------------------------
+
+    marketplace_total_revenue = sum(
+        item["revenue"]
+        for item in vendor_performance
+    )
+
+    marketplace_total_units = sum(
+        item["units_sold"]
+        for item in vendor_performance
+    )
+
+    marketplace_total_transactions = sum(
+        item["transactions"]
+        for item in vendor_performance
+    )
+
+    # -------------------------------------------------
+    # Marketplace Averages
+    # -------------------------------------------------
+
+    average_revenue = (
+        marketplace_total_revenue / total_vendors
+    )
+
+    average_units = (
+        marketplace_total_units / total_vendors
+    )
+
+    average_transactions = (
+        marketplace_total_transactions / total_vendors
+    )
+
+    # -------------------------------------------------
+    # Performance vs Marketplace Average
+    # -------------------------------------------------
+
+    if average_revenue > 0:
+
+        performance_percentage = (
+            (float(vendor_revenue) - average_revenue)
+            / average_revenue
+        ) * 100
+
+    else:
+        performance_percentage = 0
+
+    # -------------------------------------------------
+    # Market Share
+    # -------------------------------------------------
+
+    if marketplace_total_revenue > 0:
+
+        market_share = (
+            float(vendor_revenue)
+            / marketplace_total_revenue
+        ) * 100
+
+    else:
+        market_share = 0
+
+    # -------------------------------------------------
+    # Revenue Ranking
+    # -------------------------------------------------
+
+    ranked_vendors = sorted(
+        vendor_performance,
+        key=lambda x: x["revenue"],
+        reverse=True
+    )
+
+    revenue_rank = 0
+
+    for index, item in enumerate(
+        ranked_vendors,
+        start=1
+    ):
+
+        if item["vendor_id"] == vendor_id:
+            revenue_rank = index
+            break
+
+    # -------------------------------------------------
+    # Leaderboard
+    # -------------------------------------------------
+
+    leaderboard = []
+
+    for index, item in enumerate(
+        ranked_vendors[:5],
+        start=1
+    ):
+
+        leaderboard.append({
+            "rank": index,
+            "vendor_id": item["vendor_id"],
+            "business_name": item["business_name"],
+            "revenue": round(
+                item["revenue"], 2
+            ),
+            "units_sold": item["units_sold"]
+        })
+
+    # -------------------------------------------------
+    # Final Response
+    # -------------------------------------------------
+
+    return {
+
+        "vendor_id": vendor_id,
+
+        "business_name":
+            vendor.business_name,
+
+        "vendor_revenue":
+            round(float(vendor_revenue), 2),
+
+        "marketplace_average_revenue":
+            round(float(average_revenue), 2),
+
+        "performance_percentage":
+            round(
+                float(performance_percentage),
+                2
+            ),
+
+        "vendor_units_sold":
+            int(vendor_units),
+
+        "marketplace_average_units":
+            round(float(average_units), 2),
+
+        "vendor_transactions":
+            vendor_transactions,
+
+        "marketplace_average_transactions":
+            round(
+                float(average_transactions),
+                2
+            ),
+
+        "revenue_rank":
+            revenue_rank,
+
+        "total_vendors":
+            total_vendors,
+
+        "market_share_percentage":
+            round(float(market_share), 2),
+
+        "leaderboard":
+            leaderboard
+    }

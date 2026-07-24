@@ -46,6 +46,10 @@ import SalesForecast from "./pages/vendor/SalesForecast";
 import AIDashboard from "./pages/vendor/AIDashboard";
 import Wishlist from "./pages/customer/Wishlist";
 
+import AdvancedRevenueAnalytics
+  from "./pages/vendor/AdvancedRevenueAnalytics";
+import MarketplaceBenchmark
+  from "./pages/vendor/MarketplaceBenchmark";
 
 function App() {
   return (
@@ -201,6 +205,14 @@ element={<Checkout />}
   element={<AIDashboard />}
 />
 <Route path="/customer/wishlist" element={<Wishlist />} />
+<Route
+  path="/vendor/revenue-analytics"
+  element={<AdvancedRevenueAnalytics />}
+/>
+<Route
+  path="/vendor/marketplace-benchmark"
+  element={<MarketplaceBenchmark />}
+/>
 
 
       </Routes>

@@ -46,6 +46,15 @@ function DashboardLayout({ children }) {
   name: "Analytics",
   icon: "📊",
   path: "/vendor/analytics"
+},
+{
+  name: "Revenue Analytics",
+  icon: "💰",
+  path: "/vendor/revenue-analytics"
+},{
+  name: "Marketplace Benchmark",
+  icon: "🏆",
+  path: "/vendor/marketplace-benchmark"
 }
 ,{
   name: "Sales Forecast",
