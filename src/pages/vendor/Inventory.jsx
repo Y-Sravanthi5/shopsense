@@ -1,244 +1,781 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+
+import {
+  Package,
+  Boxes,
+  TriangleAlert,
+  PackageX,
+  IndianRupee,
+  Search,
+  SlidersHorizontal,
+  RefreshCw,
+  Warehouse,
+} from "lucide-react";
+
 import DashboardLayout from "../../components/layout/DashboardLayout";
 import API from "../../services/api";
 
 function Inventory() {
-
   const [products, setProducts] = useState([]);
 
+  const [search, setSearch] = useState("");
+  const [status, setStatus] = useState("All");
+
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  /* =========================================================
+     LOAD INVENTORY
+  ========================================================= */
+
+  const loadProducts = async () => {
+    try {
+      setLoading(true);
+      setError("");
+
+      const vendorId =
+        localStorage.getItem("vendor_id");
+
+      if (!vendorId) {
+        setError(
+          "Vendor session not found. Please login again."
+        );
+
+        return;
+      }
+
+      const res = await API.get(
+        `/vendor/products/${vendorId}`
+      );
+
+      setProducts(
+        Array.isArray(res.data)
+          ? res.data
+          : []
+      );
+    } catch (err) {
+      console.error(
+        "Inventory loading error:",
+        err
+      );
+
+      setError(
+        "Unable to load inventory."
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-
-    const vendorId = localStorage.getItem("vendor_id");
-
-    API.get(`/vendor/products/${vendorId}`)
-      .then((res) => {
-        setProducts(res.data);
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-
+    loadProducts();
   }, []);
 
-  // Inventory Analytics
+  /* =========================================================
+     INVENTORY ANALYTICS
+  ========================================================= */
 
-  const totalProducts = products.length;
+  const totalProducts =
+    products.length;
 
-  const totalStock = products.reduce(
-    (sum, product) => sum + Number(product.stock),
-    0
-  );
+  const totalStock =
+    products.reduce(
+      (sum, product) =>
+        sum + Number(product.stock || 0),
+      0
+    );
 
-  const lowStock = products.filter(
-    (product) => product.stock > 0 && product.stock < 10
-  ).length;
+  const lowStock =
+    products.filter((product) => {
+      const stock =
+        Number(product.stock || 0);
 
-  const outOfStock = products.filter(
-    (product) => product.stock === 0
-  ).length;
+      return stock > 0 && stock < 10;
+    }).length;
 
-  const inventoryValue = products.reduce(
-    (sum, product) =>
-      sum + Number(product.price) * Number(product.stock),
-    0
-  );
+  const outOfStock =
+    products.filter(
+      (product) =>
+        Number(product.stock || 0) === 0
+    ).length;
+
+  const inventoryValue =
+    products.reduce(
+      (sum, product) =>
+        sum +
+        Number(product.price || 0) *
+          Number(product.stock || 0),
+      0
+    );
+
+  /* =========================================================
+     FILTER INVENTORY
+  ========================================================= */
+
+  const filteredProducts =
+    useMemo(() => {
+      return products.filter(
+        (product) => {
+          const name =
+            product.product_name || "";
+
+          const category =
+            product.category || "";
+
+          const stock =
+            Number(product.stock || 0);
+
+          const searchValue =
+            search
+              .trim()
+              .toLowerCase();
+
+          const searchMatch =
+            name
+              .toLowerCase()
+              .includes(searchValue) ||
+            category
+              .toLowerCase()
+              .includes(searchValue);
+
+          let statusMatch = true;
+
+          if (status === "Available") {
+            statusMatch =
+              stock >= 10;
+          }
+
+          if (status === "Low Stock") {
+            statusMatch =
+              stock > 0 &&
+              stock < 10;
+          }
+
+          if (status === "Out of Stock") {
+            statusMatch =
+              stock === 0;
+          }
+
+          return (
+            searchMatch &&
+            statusMatch
+          );
+        }
+      );
+    }, [products, search, status]);
+
+  /* =========================================================
+     STOCK STATUS
+  ========================================================= */
+
+  const getStockStatus = (stockValue) => {
+    const stock =
+      Number(stockValue || 0);
+
+    if (stock === 0) {
+      return {
+        label: "Out of Stock",
+        className: "out",
+      };
+    }
+
+    if (stock < 10) {
+      return {
+        label: "Low Stock",
+        className: "low",
+      };
+    }
+
+    return {
+      label: "Available",
+      className: "available",
+    };
+  };
+
+  /* =========================================================
+     FORMAT NUMBER
+  ========================================================= */
+
+  const formatNumber = (number) =>
+    Number(number || 0).toLocaleString(
+      "en-IN"
+    );
+
+  const formatPrice = (number) =>
+    Number(number || 0).toLocaleString(
+      "en-IN",
+      {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      }
+    );
+
+  /* =========================================================
+     PAGE
+  ========================================================= */
 
   return (
-
     <DashboardLayout>
 
-      <div className="container-fluid">
+      <div className="inventory-page">
 
-        <h2 className="mb-4 fw-bold">
-          📦 Inventory Management
-        </h2>
+        {/* =====================================================
+            HEADER
+        ===================================================== */}
 
-        {/* Analytics Cards */}
+        <header className="inventory-header">
 
-        <div className="row g-4 mb-4">
+          <div>
 
-          <div className="col-lg-3 col-md-6">
+            <div className="inventory-eyebrow">
+              STORE MANAGEMENT
+            </div>
 
-            <div className="card shadow border-0 text-center p-4">
+            <h1>
+              Inventory
+            </h1>
 
-              <h6>Total Products</h6>
+            <p>
+              Monitor stock levels, inventory
+              value and products that need
+              restocking.
+            </p>
 
-              <h2 className="text-primary">
-                {totalProducts}
+          </div>
+
+          <button
+            type="button"
+            className="inventory-refresh-button"
+            onClick={loadProducts}
+            disabled={loading}
+          >
+            <RefreshCw
+              size={17}
+              className={
+                loading
+                  ? "inventory-spin"
+                  : ""
+              }
+            />
+
+            Refresh
+          </button>
+
+        </header>
+
+        {/* =====================================================
+            SUMMARY CARDS
+        ===================================================== */}
+
+        <section className="inventory-summary-grid">
+
+          {/* TOTAL PRODUCTS */}
+
+          <article className="inventory-summary-card">
+
+            <div className="inventory-summary-icon violet">
+              <Package size={21} />
+            </div>
+
+            <div>
+              <span>
+                Total Products
+              </span>
+
+              <strong>
+                {formatNumber(
+                  totalProducts
+                )}
+              </strong>
+
+              <small>
+                Products in catalog
+              </small>
+            </div>
+
+          </article>
+
+          {/* TOTAL STOCK */}
+
+          <article className="inventory-summary-card">
+
+            <div className="inventory-summary-icon green">
+              <Boxes size={21} />
+            </div>
+
+            <div>
+              <span>
+                Total Stock
+              </span>
+
+              <strong>
+                {formatNumber(
+                  totalStock
+                )}
+              </strong>
+
+              <small>
+                Units in inventory
+              </small>
+            </div>
+
+          </article>
+
+          {/* LOW STOCK */}
+
+          <article className="inventory-summary-card">
+
+            <div className="inventory-summary-icon amber">
+              <TriangleAlert size={21} />
+            </div>
+
+            <div>
+              <span>
+                Low Stock
+              </span>
+
+              <strong>
+                {formatNumber(
+                  lowStock
+                )}
+              </strong>
+
+              <small>
+                Below 10 units
+              </small>
+            </div>
+
+          </article>
+
+          {/* OUT OF STOCK */}
+
+          <article className="inventory-summary-card">
+
+            <div className="inventory-summary-icon red">
+              <PackageX size={21} />
+            </div>
+
+            <div>
+              <span>
+                Out of Stock
+              </span>
+
+              <strong>
+                {formatNumber(
+                  outOfStock
+                )}
+              </strong>
+
+              <small>
+                Needs restocking
+              </small>
+            </div>
+
+          </article>
+
+        </section>
+
+        {/* =====================================================
+            INVENTORY VALUE
+        ===================================================== */}
+
+        <section className="inventory-value-card">
+
+          <div className="inventory-value-left">
+
+            <div className="inventory-value-icon">
+              <IndianRupee size={23} />
+            </div>
+
+            <div>
+
+              <span>
+                TOTAL INVENTORY VALUE
+              </span>
+
+              <h2>
+                ₹
+                {formatPrice(
+                  inventoryValue
+                )}
               </h2>
+
+              <p>
+                Current value of all
+                available inventory
+              </p>
 
             </div>
 
           </div>
 
-          <div className="col-lg-3 col-md-6">
+          <div className="inventory-value-decoration">
+            <Warehouse size={50} />
+          </div>
 
-            <div className="card shadow border-0 text-center p-4">
+        </section>
 
-              <h6>Total Stock</h6>
+        {/* =====================================================
+            INVENTORY PANEL
+        ===================================================== */}
 
-              <h2 className="text-success">
-                {totalStock}
+        <section className="inventory-panel">
+
+          {/* PANEL HEADER */}
+
+          <div className="inventory-panel-header">
+
+            <div>
+
+              <h2>
+                Inventory Overview
               </h2>
+
+              <p>
+                Track stock availability
+                across your products.
+              </p>
+
+            </div>
+
+            <span className="inventory-product-count">
+              {filteredProducts.length} products
+            </span>
+
+          </div>
+
+          {/* ===================================================
+              SEARCH + FILTER
+          =================================================== */}
+
+          <div className="inventory-toolbar">
+
+            <div className="inventory-search">
+
+              <Search size={18} />
+
+              <input
+                type="text"
+                placeholder="Search product or category..."
+                value={search}
+                onChange={(e) =>
+                  setSearch(
+                    e.target.value
+                  )
+                }
+              />
+
+            </div>
+
+            <div className="inventory-filter">
+
+              <SlidersHorizontal
+                size={17}
+              />
+
+              <select
+                value={status}
+                onChange={(e) =>
+                  setStatus(
+                    e.target.value
+                  )
+                }
+              >
+
+                <option value="All">
+                  All Stock Status
+                </option>
+
+                <option value="Available">
+                  Available
+                </option>
+
+                <option value="Low Stock">
+                  Low Stock
+                </option>
+
+                <option value="Out of Stock">
+                  Out of Stock
+                </option>
+
+              </select>
 
             </div>
 
           </div>
 
-          <div className="col-lg-3 col-md-6">
+          {/* ===================================================
+              ERROR
+          =================================================== */}
 
-            <div className="card shadow border-0 text-center p-4">
+          {error && (
 
-              <h6>Low Stock</h6>
+            <div className="inventory-error">
 
-              <h2 className="text-warning">
-                {lowStock}
-              </h2>
+              <TriangleAlert
+                size={18}
+              />
 
-            </div>
+              <span>
+                {error}
+              </span>
 
-          </div>
-
-          <div className="col-lg-3 col-md-6">
-
-            <div className="card shadow border-0 text-center p-4">
-
-              <h6>Out of Stock</h6>
-
-              <h2 className="text-danger">
-                {outOfStock}
-              </h2>
-
-            </div>
-
-          </div>
-
-        </div>
-
-        <div className="row mb-4">
-
-          <div className="col-12">
-
-            <div className="card shadow border-0 p-4 text-center">
-
-              <h5>Total Inventory Value</h5>
-
-              <h2 className="text-success">
-
-                ₹ {inventoryValue.toFixed(2)}
-
-              </h2>
+              <button
+                type="button"
+                onClick={loadProducts}
+              >
+                Try Again
+              </button>
 
             </div>
 
-          </div>
+          )}
 
-        </div>
+          {/* ===================================================
+              TABLE
+          =================================================== */}
 
-        {/* Inventory Table */}
+          {loading ? (
 
-        <div className="card shadow border-0">
+            <div className="inventory-loading">
 
-          <div className="card-body">
+              <RefreshCw
+                size={24}
+                className="inventory-spin"
+              />
 
-            <table className="table table-bordered table-hover align-middle">
+              Loading inventory...
 
-              <thead className="table-primary">
+            </div>
 
-                <tr>
+          ) : filteredProducts.length > 0 ? (
 
-                  <th>Product</th>
-                  <th>Category</th>
-                  <th>Price</th>
-                  <th>Stock</th>
-                  <th>Reorder Level</th>
-                  <th>Inventory Value</th>
-                  <th>Status</th>
+            <div className="inventory-table-wrapper">
 
-                </tr>
+              <table className="inventory-table">
 
-              </thead>
-
-              <tbody>
-
-                {products.length > 0 ? (
-
-                  products.map((product) => (
-
-                    <tr key={product.id}>
-
-                      <td>{product.product_name}</td>
-
-                      <td>{product.category}</td>
-
-                      <td>₹ {product.price}</td>
-
-                      <td>{product.stock}</td>
-
-                      <td>10</td>
-
-                      <td>
-
-                        ₹ {(product.price * product.stock).toFixed(2)}
-
-                      </td>
-
-                      <td>
-
-                        {product.stock === 0 ? (
-
-                          <span className="badge bg-danger">
-                            Out of Stock
-                          </span>
-
-                        ) : product.stock < 10 ? (
-
-                          <span className="badge bg-warning text-dark">
-                            Low Stock
-                          </span>
-
-                        ) : (
-
-                          <span className="badge bg-success">
-                            Available
-                          </span>
-
-                        )}
-
-                      </td>
-
-                    </tr>
-
-                  ))
-
-                ) : (
+                <thead>
 
                   <tr>
 
-                    <td colSpan="7" className="text-center">
+                    <th>
+                      Product
+                    </th>
 
-                      No Products Found
+                    <th>
+                      Category
+                    </th>
 
-                    </td>
+                    <th>
+                      Price
+                    </th>
+
+                    <th>
+                      Stock
+                    </th>
+
+                    <th>
+                      Reorder Level
+                    </th>
+
+                    <th>
+                      Inventory Value
+                    </th>
+
+                    <th>
+                      Status
+                    </th>
 
                   </tr>
 
-                )}
+                </thead>
 
-              </tbody>
+                <tbody>
 
-            </table>
+                  {filteredProducts.map(
+                    (product) => {
 
-          </div>
+                      const stock =
+                        Number(
+                          product.stock || 0
+                        );
 
-        </div>
+                      const price =
+                        Number(
+                          product.price || 0
+                        );
+
+                      const productValue =
+                        stock * price;
+
+                      const stockStatus =
+                        getStockStatus(
+                          stock
+                        );
+
+                      return (
+
+                        <tr
+                          key={product.id}
+                        >
+
+                          {/* PRODUCT */}
+
+                          <td>
+
+                            <div className="inventory-product">
+
+                              <div className="inventory-product-image">
+
+                                {product.image ? (
+
+                                  <img
+                                    src={`http://127.0.0.1:8000/uploads/${product.image}`}
+                                    alt={
+                                      product.product_name
+                                    }
+                                    onError={(e) => {
+                                      e.currentTarget.style.display =
+                                        "none";
+                                    }}
+                                  />
+
+                                ) : (
+
+                                  <Package
+                                    size={18}
+                                  />
+
+                                )}
+
+                              </div>
+
+                              <div>
+
+                                <strong>
+                                  {
+                                    product.product_name
+                                  }
+                                </strong>
+
+                                <span>
+                                  Product #{product.id}
+                                </span>
+
+                              </div>
+
+                            </div>
+
+                          </td>
+
+                          {/* CATEGORY */}
+
+                          <td>
+
+                            <span className="inventory-category">
+                              {product.category ||
+                                "Uncategorized"}
+                            </span>
+
+                          </td>
+
+                          {/* PRICE */}
+
+                          <td className="inventory-money">
+                            ₹
+                            {formatPrice(
+                              price
+                            )}
+                          </td>
+
+                          {/* STOCK */}
+
+                          <td>
+
+                            <strong className="inventory-stock-number">
+                              {formatNumber(
+                                stock
+                              )}
+                            </strong>
+
+                          </td>
+
+                          {/* REORDER */}
+
+                          <td>
+
+                            <span className="inventory-reorder">
+                              10 units
+                            </span>
+
+                          </td>
+
+                          {/* VALUE */}
+
+                          <td className="inventory-money">
+                            ₹
+                            {formatPrice(
+                              productValue
+                            )}
+                          </td>
+
+                          {/* STATUS */}
+
+                          <td>
+
+                            <span
+                              className={`inventory-status ${stockStatus.className}`}
+                            >
+                              <i />
+
+                              {
+                                stockStatus.label
+                              }
+                            </span>
+
+                          </td>
+
+                        </tr>
+
+                      );
+                    }
+                  )}
+
+                </tbody>
+
+              </table>
+
+            </div>
+
+          ) : (
+
+            <div className="inventory-empty">
+
+              <div className="inventory-empty-icon">
+                <Package size={28} />
+              </div>
+
+              <h3>
+                No inventory found
+              </h3>
+
+              <p>
+                {search ||
+                status !== "All"
+                  ? "Try changing your search or stock filter."
+                  : "Products will appear here once they are added to your catalog."}
+              </p>
+
+            </div>
+
+          )}
+
+        </section>
 
       </div>
 
     </DashboardLayout>
-
   );
-
 }
 
 export default Inventory;

@@ -1,0 +1,411 @@
+/* =========================================================
+   SHOPSENSE GLOBAL DESIGN SYSTEM
+   ========================================================= */
+
+:root {
+  /* Brand */
+  --ss-primary: #6366f1;
+  --ss-primary-hover: #4f46e5;
+  --ss-primary-soft: #eef2ff;
+
+  /* Dark navigation */
+  --ss-sidebar: #111827;
+  --ss-sidebar-hover: #1f2937;
+  --ss-sidebar-text: #cbd5e1;
+  --ss-sidebar-muted: #94a3b8;
+
+  /* Light workspace */
+  --ss-bg: #f6f8fc;
+  --ss-surface: #ffffff;
+  --ss-surface-soft: #f8fafc;
+
+  /* Typography */
+  --ss-heading: #172033;
+  --ss-text: #334155;
+  --ss-muted: #64748b;
+  --ss-light-text: #94a3b8;
+
+  /* Borders */
+  --ss-border: #e7eaf0;
+  --ss-border-soft: #f1f5f9;
+
+  /* Semantic */
+  --ss-success: #059669;
+  --ss-success-soft: #ecfdf5;
+
+  --ss-warning: #d97706;
+  --ss-warning-soft: #fffbeb;
+
+  --ss-danger: #dc2626;
+  --ss-danger-soft: #fef2f2;
+
+  --ss-info: #2563eb;
+  --ss-info-soft: #eff6ff;
+
+  /* AI */
+  --ss-ai: #7c3aed;
+  --ss-ai-soft: #f5f3ff;
+
+  /* Radius */
+  --ss-radius-sm: 8px;
+  --ss-radius: 12px;
+  --ss-radius-lg: 16px;
+
+  /* Shadows */
+  --ss-shadow-sm:
+    0 1px 2px rgba(15, 23, 42, 0.04);
+
+  --ss-shadow:
+    0 4px 16px rgba(15, 23, 42, 0.05);
+
+  --ss-shadow-hover:
+    0 10px 28px rgba(15, 23, 42, 0.08);
+
+  /* Layout */
+  --ss-sidebar-width: 268px;
+  --ss-topbar-height: 72px;
+}
+
+
+/* =========================================================
+   GLOBAL
+   ========================================================= */
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+
+  background: var(--ss-bg);
+
+  color: var(--ss-text);
+
+  font-family:
+    Inter,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+
+  -webkit-font-smoothing: antialiased;
+}
+
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
+}
+
+
+/* =========================================================
+   TYPOGRAPHY
+   ========================================================= */
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  color: var(--ss-heading);
+}
+
+.ss-page-title {
+  margin: 0;
+
+  font-size: 28px;
+  font-weight: 700;
+
+  letter-spacing: -0.6px;
+}
+
+.ss-page-description {
+  margin: 6px 0 0;
+
+  color: var(--ss-muted);
+
+  font-size: 14px;
+}
+
+
+/* =========================================================
+   STANDARD CARD
+   ========================================================= */
+
+.ss-card {
+  background: var(--ss-surface);
+
+  border: 1px solid var(--ss-border);
+
+  border-radius: var(--ss-radius-lg);
+
+  box-shadow: var(--ss-shadow-sm);
+}
+
+.ss-card-hover {
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease;
+}
+
+.ss-card-hover:hover {
+  transform: translateY(-2px);
+
+  box-shadow: var(--ss-shadow-hover);
+}
+
+
+/* =========================================================
+   PRIMARY BUTTON
+   ========================================================= */
+
+.ss-btn-primary {
+  min-height: 42px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 8px;
+
+  padding: 0 17px;
+
+  border: 0;
+  border-radius: 9px;
+
+  background: var(--ss-primary);
+
+  color: #ffffff;
+
+  font-size: 13px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition: 0.18s ease;
+}
+
+.ss-btn-primary:hover {
+  background: var(--ss-primary-hover);
+
+  transform: translateY(-1px);
+}
+
+
+/* =========================================================
+   SECONDARY BUTTON
+   ========================================================= */
+
+.ss-btn-secondary {
+  min-height: 42px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 8px;
+
+  padding: 0 17px;
+
+  border: 1px solid var(--ss-border);
+
+  border-radius: 9px;
+
+  background: #ffffff;
+
+  color: var(--ss-text);
+
+  font-size: 13px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition: 0.18s ease;
+}
+
+.ss-btn-secondary:hover {
+  background: var(--ss-surface-soft);
+
+  border-color: #cbd5e1;
+}
+
+
+/* =========================================================
+   STATUS PILLS
+   ========================================================= */
+
+.ss-status {
+  display: inline-flex;
+  align-items: center;
+
+  gap: 5px;
+
+  padding: 5px 9px;
+
+  border-radius: 999px;
+
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.ss-status-success {
+  background: var(--ss-success-soft);
+  color: var(--ss-success);
+}
+
+.ss-status-warning {
+  background: var(--ss-warning-soft);
+  color: var(--ss-warning);
+}
+
+.ss-status-danger {
+  background: var(--ss-danger-soft);
+  color: var(--ss-danger);
+}
+
+.ss-status-info {
+  background: var(--ss-info-soft);
+  color: var(--ss-info);
+}
+
+
+/* =========================================================
+   SHOPSENSE INTELLIGENCE
+   ========================================================= */
+
+.ss-intelligence {
+  background:
+    linear-gradient(
+      135deg,
+      #faf9ff 0%,
+      #f5f3ff 100%
+    );
+
+  border: 1px solid #e9e5ff;
+
+  border-radius: var(--ss-radius-lg);
+}
+
+.ss-intelligence-label {
+  display: inline-flex;
+  align-items: center;
+
+  gap: 6px;
+
+  color: var(--ss-ai);
+
+  font-size: 12px;
+  font-weight: 700;
+
+  letter-spacing: 0.2px;
+}
+
+
+/* =========================================================
+   FORM ELEMENTS
+   ========================================================= */
+
+.ss-input,
+.ss-select {
+  width: 100%;
+
+  min-height: 43px;
+
+  padding: 0 12px;
+
+  border: 1px solid var(--ss-border);
+
+  border-radius: 9px;
+
+  background: #ffffff;
+
+  color: var(--ss-text);
+
+  outline: none;
+
+  transition: 0.18s ease;
+}
+
+.ss-input:focus,
+.ss-select:focus {
+  border-color: #a5b4fc;
+
+  box-shadow:
+    0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+
+/* =========================================================
+   TABLE
+   ========================================================= */
+
+.ss-table {
+  width: 100%;
+
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.ss-table th {
+  padding: 13px 16px;
+
+  background: var(--ss-surface-soft);
+
+  border-bottom: 1px solid var(--ss-border);
+
+  color: var(--ss-muted);
+
+  font-size: 12px;
+  font-weight: 650;
+
+  text-align: left;
+}
+
+.ss-table td {
+  padding: 14px 16px;
+
+  border-bottom: 1px solid var(--ss-border-soft);
+
+  color: var(--ss-text);
+
+  font-size: 13px;
+}
+
+.ss-table tbody tr {
+  transition: background 0.15s ease;
+}
+
+.ss-table tbody tr:hover {
+  background: #fafbff;
+}
+
+
+/* =========================================================
+   SCROLLBAR
+   ========================================================= */
+
+::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}

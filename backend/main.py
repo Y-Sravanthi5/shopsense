@@ -6,12 +6,14 @@ from sqlalchemy.orm import Session
 
 import os
 import shutil
-
+import scheduler
 import models
 import schemas
 import crud
+import analytics_workflow
 
 from database import SessionLocal, engine
+
 
 # --------------------------------------------------
 # Create Database Tables
@@ -22,6 +24,10 @@ models.Base.metadata.create_all(bind=engine)
 # FastAPI App
 # --------------------------------------------------
 app = FastAPI(title="ShopSense API")
+@app.on_event("startup")
+def startup_event():
+
+    scheduler.start_scheduler()
 
 # --------------------------------------------------
 # Upload Folder
@@ -40,8 +46,8 @@ app.mount(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "http://localhost:5173",
-        "http://127.0.0.1:5173",
+        "http://localhost:5174",
+        "http://127.0.0.1:5174",
     ],
     allow_credentials=True,
     allow_methods=["*"],
@@ -749,4 +755,10 @@ def get_marketplace_benchmark(
         db,
         vendor_id
     )
-
+@app.post("/admin/run-analytics-workflow")
+def run_analytics_pipeline(
+    db: Session = Depends(get_db)
+):
+    return analytics_workflow.run_analytics_workflow(
+        db
+    )

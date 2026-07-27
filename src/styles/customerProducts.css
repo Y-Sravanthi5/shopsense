@@ -1,0 +1,517 @@
+/* ==============================================
+   CUSTOMER PRODUCTS
+============================================== */
+
+.customer-products-page {
+  width: 100%;
+  min-height: 100vh;
+
+  background: #faf9fc;
+
+  color: #191725;
+
+  text-align: left;
+}
+
+
+/* ==============================================
+   PAGE HEADER
+============================================== */
+
+.products-page-header {
+  padding: 38px 7% 36px;
+
+  background:
+    linear-gradient(
+      135deg,
+      #f4f0ff 0%,
+      #fbfaff 55%,
+      #eee8ff 100%
+    );
+
+  border-bottom: 1px solid #e8e3f5;
+}
+
+.products-header-inner {
+  max-width: 1180px;
+
+  margin: 0 auto;
+}
+
+.products-eyebrow {
+  margin: 0 0 5px;
+
+  color: #7657e8;
+
+  font-size: 12px;
+  font-weight: 800;
+
+  letter-spacing: 1.1px;
+}
+
+.products-page-header h1 {
+  margin: 0;
+
+  color: #171423;
+
+  font-size: 34px;
+  font-weight: 760;
+
+  letter-spacing: -0.8px;
+}
+
+.products-page-header p:last-child {
+  margin: 7px 0 0;
+
+  color: #777280;
+
+  font-size: 15px;
+}
+
+
+/* ==============================================
+   MAIN
+============================================== */
+
+.products-main {
+  width: 100%;
+  max-width: 1180px;
+
+  margin: 0 auto;
+
+  padding: 28px 30px 60px;
+
+  box-sizing: border-box;
+}
+
+
+/* ==============================================
+   FILTER BAR
+============================================== */
+
+.products-filter-card {
+  display: grid;
+
+  grid-template-columns:
+    minmax(280px, 1.7fr)
+    minmax(190px, 0.8fr)
+    minmax(190px, 0.8fr);
+
+  gap: 12px;
+
+  padding: 15px;
+
+  background: #ffffff;
+
+  border: 1px solid #e9e7ef;
+  border-radius: 14px;
+
+  box-shadow:
+    0 5px 18px rgba(36, 29, 58, 0.04);
+
+  margin-bottom: 28px;
+}
+
+
+/* ==============================================
+   SEARCH
+============================================== */
+
+.products-search-box {
+  position: relative;
+
+  display: flex;
+  align-items: center;
+}
+
+.products-search-icon {
+  position: absolute;
+
+  left: 15px;
+
+  color: #96919e;
+
+  pointer-events: none;
+}
+
+.products-search-box input {
+  width: 100%;
+  height: 46px;
+
+  padding: 0 15px 0 44px;
+
+  box-sizing: border-box;
+
+  border: 1px solid #dfdce6;
+  border-radius: 9px;
+
+  outline: none;
+
+  color: #403c48;
+  background: #fbfbfd;
+
+  font-size: 14px;
+
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
+}
+
+.products-search-box input::placeholder {
+  color: #a5a1ac;
+}
+
+.products-search-box input:focus {
+  border-color: #a995ed;
+
+  box-shadow:
+    0 0 0 3px rgba(118, 87, 232, 0.08);
+
+  background: #ffffff;
+}
+
+
+/* ==============================================
+   SELECT
+============================================== */
+
+.products-select-wrapper {
+  position: relative;
+
+  display: flex;
+  align-items: center;
+}
+
+.products-select-wrapper select {
+  width: 100%;
+  height: 46px;
+
+  padding: 0 38px 0 14px;
+
+  box-sizing: border-box;
+
+  appearance: none;
+
+  border: 1px solid #dfdce6;
+  border-radius: 9px;
+
+  outline: none;
+
+  color: #5e5967;
+  background: #fbfbfd;
+
+  font-size: 14px;
+
+  cursor: pointer;
+}
+
+.products-select-wrapper:has(
+  .products-select-icon
+) select {
+  padding-left: 42px;
+}
+
+.products-select-wrapper select:focus {
+  border-color: #a995ed;
+
+  box-shadow:
+    0 0 0 3px rgba(118, 87, 232, 0.08);
+}
+
+.products-select-icon {
+  position: absolute;
+
+  left: 14px;
+
+  z-index: 1;
+
+  color: #8f8999;
+
+  pointer-events: none;
+}
+
+.products-chevron {
+  position: absolute;
+
+  right: 13px;
+
+  color: #9994a1;
+
+  pointer-events: none;
+}
+
+
+/* ==============================================
+   RESULT BAR
+============================================== */
+
+.products-result-bar {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+
+  gap: 20px;
+
+  margin-bottom: 19px;
+}
+
+.products-result-bar h2 {
+  margin: 0;
+
+  color: #292531;
+
+  font-size: 22px;
+  font-weight: 730;
+}
+
+.products-result-bar p {
+  margin: 4px 0 0;
+
+  color: #908b98;
+
+  font-size: 13px;
+}
+
+.products-clear-btn {
+  padding: 7px 11px;
+
+  border: 1px solid #ded8ef;
+  border-radius: 7px;
+
+  color: #7657e8;
+  background: #ffffff;
+
+  font-size: 12px;
+  font-weight: 650;
+
+  cursor: pointer;
+}
+
+.products-clear-btn:hover {
+  background: #f5f1ff;
+}
+
+
+/* ==============================================
+   PRODUCT GRID
+============================================== */
+
+.customer-product-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(4, minmax(0, 1fr));
+
+  gap: 18px;
+
+  align-items: stretch;
+}
+
+
+/*
+   ProductCard currently may contain Bootstrap
+   col-md-* classes. Because it's inside CSS Grid,
+   force the direct children to use the grid width.
+*/
+
+.customer-product-grid > * {
+  width: 100% !important;
+  max-width: none !important;
+
+  margin: 0 !important;
+}
+
+
+/* ==============================================
+   EMPTY STATE
+============================================== */
+
+.products-empty {
+  min-height: 310px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  padding: 30px;
+
+  box-sizing: border-box;
+
+  text-align: center;
+
+  background: #ffffff;
+
+  border: 1px solid #ebe9f1;
+  border-radius: 15px;
+}
+
+.products-empty-icon {
+  width: 60px;
+  height: 60px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  margin-bottom: 13px;
+
+  color: #7657e8;
+  background: #f0ebff;
+
+  border-radius: 15px;
+}
+
+.products-empty h3 {
+  margin: 0 0 5px;
+
+  color: #393541;
+
+  font-size: 18px;
+}
+
+.products-empty p {
+  max-width: 430px;
+
+  margin: 0;
+
+  color: #918c99;
+
+  font-size: 13px;
+}
+
+.products-empty button {
+  margin-top: 16px;
+
+  padding: 9px 15px;
+
+  border: none;
+  border-radius: 8px;
+
+  color: #ffffff;
+  background: #7657e8;
+
+  font-size: 13px;
+  font-weight: 650;
+
+  cursor: pointer;
+}
+
+
+/* ==============================================
+   LOADING
+============================================== */
+
+.products-loading {
+  min-height: 320px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  text-align: center;
+}
+
+.products-loader {
+  width: 30px;
+  height: 30px;
+
+  margin-bottom: 12px;
+
+  border: 3px solid #e7e1f8;
+  border-top-color: #7657e8;
+
+  border-radius: 50%;
+
+  animation:
+    products-spin 0.75s linear infinite;
+}
+
+.products-loading h3 {
+  margin: 0 0 4px;
+
+  color: #403b48;
+
+  font-size: 16px;
+}
+
+.products-loading p {
+  margin: 0;
+
+  color: #96919e;
+
+  font-size: 12px;
+}
+
+@keyframes products-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+
+/* ==============================================
+   RESPONSIVE
+============================================== */
+
+@media (max-width: 1050px) {
+
+  .customer-product-grid {
+    grid-template-columns:
+      repeat(3, minmax(0, 1fr));
+  }
+
+}
+
+
+@media (max-width: 850px) {
+
+  .products-filter-card {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .products-search-box {
+    grid-column: 1 / -1;
+  }
+
+  .customer-product-grid {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
+
+}
+
+
+@media (max-width: 600px) {
+
+  .products-page-header {
+    padding: 30px 20px;
+  }
+
+  .products-page-header h1 {
+    font-size: 29px;
+  }
+
+  .products-main {
+    padding: 22px 17px 45px;
+  }
+
+  .products-filter-card {
+    grid-template-columns: 1fr;
+  }
+
+  .products-search-box {
+    grid-column: auto;
+  }
+
+  .customer-product-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .products-result-bar {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+}

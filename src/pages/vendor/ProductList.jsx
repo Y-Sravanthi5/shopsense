@@ -1,285 +1,627 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+
+import {
+  Plus,
+  Search,
+  SlidersHorizontal,
+  Package,
+  Pencil,
+  Trash2,
+  Boxes,
+  TriangleAlert,
+  PackageX,
+  RefreshCw,
+} from "lucide-react";
+
 import DashboardLayout from "../../components/layout/DashboardLayout";
 import API from "../../services/api";
 
 function ProductList() {
+  const navigate = useNavigate();
 
   const [products, setProducts] = useState([]);
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("All");
   const [status, setStatus] = useState("All");
 
-  const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  /* =========================================================
+     LOAD PRODUCTS
+  ========================================================= */
+
+  const loadProducts = async () => {
+    try {
+      setLoading(true);
+      setError("");
+
+      const vendorId = localStorage.getItem("vendor_id");
+
+      if (!vendorId) {
+        setError("Vendor session not found.");
+        return;
+      }
+
+      const res = await API.get(
+        `/vendor/products/${vendorId}`
+      );
+
+      setProducts(
+        Array.isArray(res.data) ? res.data : []
+      );
+    } catch (err) {
+      console.error("Product load error:", err);
+
+      setError(
+        "Unable to load products. Please try again."
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     loadProducts();
   }, []);
 
-  const loadProducts = () => {
-
-    const vendorId = localStorage.getItem("vendor_id");
-
-    API.get(`/vendor/products/${vendorId}`)
-      .then((res) => {
-        setProducts(res.data);
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-
-  };
+  /* =========================================================
+     DELETE PRODUCT
+  ========================================================= */
 
   const deleteProduct = async (id) => {
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this product?"
+    );
 
-    if (!window.confirm("Delete this product?")) return;
+    if (!confirmed) return;
 
     try {
-
       await API.delete(`/products/${id}`);
 
-      alert("Product Deleted Successfully!");
-
-      loadProducts();
-
+      setProducts((currentProducts) =>
+        currentProducts.filter(
+          (product) => product.id !== id
+        )
+      );
     } catch (err) {
+      console.error("Delete product error:", err);
 
-      console.log(err);
-      alert("Delete Failed");
-
+      alert("Unable to delete product.");
     }
-
   };
 
-  const categories = [
-    "All",
-    ...new Set(products.map((product) => product.category))
-  ];
+  /* =========================================================
+     CATEGORIES
+  ========================================================= */
 
-  const filteredProducts = products.filter((product) => {
+  const categories = useMemo(() => {
+    const productCategories = products
+      .map((product) => product.category)
+      .filter(Boolean);
 
-    const searchMatch = product.product_name
-      .toLowerCase()
-      .includes(search.toLowerCase());
+    return [
+      "All",
+      ...new Set(productCategories),
+    ];
+  }, [products]);
 
-    const categoryMatch =
-      category === "All" || product.category === category;
+  /* =========================================================
+     FILTER PRODUCTS
+  ========================================================= */
 
-    let statusMatch = true;
+  const filteredProducts = useMemo(() => {
+    return products.filter((product) => {
+      const productName =
+        product.product_name || "";
 
-    if (status === "In Stock")
-      statusMatch = product.stock >= 10;
+      const productCategory =
+        product.category || "";
 
-    else if (status === "Low Stock")
-      statusMatch = product.stock > 0 && product.stock < 10;
+      const productStock =
+        Number(product.stock) || 0;
 
-    else if (status === "Out of Stock")
-      statusMatch = product.stock === 0;
+      const searchMatch = productName
+        .toLowerCase()
+        .includes(search.trim().toLowerCase());
 
-    return searchMatch && categoryMatch && statusMatch;
+      const categoryMatch =
+        category === "All" ||
+        productCategory === category;
 
-  });
+      let statusMatch = true;
+
+      if (status === "In Stock") {
+        statusMatch = productStock >= 10;
+      } else if (status === "Low Stock") {
+        statusMatch =
+          productStock > 0 &&
+          productStock < 10;
+      } else if (status === "Out of Stock") {
+        statusMatch = productStock === 0;
+      }
+
+      return (
+        searchMatch &&
+        categoryMatch &&
+        statusMatch
+      );
+    });
+  }, [products, search, category, status]);
+
+  /* =========================================================
+     PRODUCT COUNTS
+  ========================================================= */
+
+  const totalProducts = products.length;
+
+  const inStockProducts = products.filter(
+    (product) => Number(product.stock) >= 10
+  ).length;
+
+  const lowStockProducts = products.filter(
+    (product) =>
+      Number(product.stock) > 0 &&
+      Number(product.stock) < 10
+  ).length;
+
+  const outOfStockProducts = products.filter(
+    (product) => Number(product.stock) === 0
+  ).length;
+
+  /* =========================================================
+     PRICE FORMATTER
+  ========================================================= */
+
+  const formatPrice = (price) => {
+    return Number(price || 0).toLocaleString(
+      "en-IN",
+      {
+        maximumFractionDigits: 2,
+      }
+    );
+  };
+
+  /* =========================================================
+     STOCK STATUS
+  ========================================================= */
+
+  const getStockStatus = (stock) => {
+    const quantity = Number(stock) || 0;
+
+    if (quantity === 0) {
+      return {
+        label: "Out of Stock",
+        className: "out",
+      };
+    }
+
+    if (quantity < 10) {
+      return {
+        label: `Low Stock · ${quantity}`,
+        className: "low",
+      };
+    }
+
+    return {
+      label: `In Stock · ${quantity}`,
+      className: "available",
+    };
+  };
 
   return (
-
     <DashboardLayout>
 
-      <div className="d-flex justify-content-between align-items-center mb-4">
+      <div className="products-page">
 
-        <h2
-          className="fw-bold"
-          style={{ color: "#5B3CC4" }}
-        >
-          📦 Product Management
-        </h2>
+        {/* =====================================================
+            PAGE HEADER
+        ===================================================== */}
 
-        <button
-          className="btn"
-          style={{
-            background: "#5B3CC4",
-            color: "white",
-            borderRadius: "10px"
-          }}
-          onClick={() => navigate("/vendor/add-product")}
-        >
-          ➕ Add Product
-        </button>
+        <header className="products-page-header">
 
-      </div>
+          <div>
+            <div className="products-eyebrow">
+              STORE MANAGEMENT
+            </div>
 
-      {/* Search & Filters */}
+            <h1>Products</h1>
 
-      <div className="row mb-4">
+            <p>
+              Manage your product catalog, pricing
+              and inventory from one place.
+            </p>
+          </div>
 
-        <div className="col-md-4">
-
-          <input
-            type="text"
-            className="form-control"
-            placeholder="🔍 Search Product..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-
-        </div>
-
-        <div className="col-md-4">
-
-          <select
-            className="form-select"
-            value={category}
-            onChange={(e) => setCategory(e.target.value)}
+          <button
+            type="button"
+            className="products-add-button"
+            onClick={() =>
+              navigate("/vendor/add-product")
+            }
           >
+            <Plus size={18} />
 
-            {categories.map((cat) => (
+            <span>Add Product</span>
+          </button>
 
-              <option key={cat} value={cat}>
-                {cat}
+        </header>
+
+        {/* =====================================================
+            SUMMARY CARDS
+        ===================================================== */}
+
+        <section className="products-summary-grid">
+
+          <div className="products-summary-card">
+
+            <div className="products-summary-icon violet">
+              <Package size={20} />
+            </div>
+
+            <div>
+              <span>Total Products</span>
+              <strong>{totalProducts}</strong>
+            </div>
+
+          </div>
+
+          <div className="products-summary-card">
+
+            <div className="products-summary-icon green">
+              <Boxes size={20} />
+            </div>
+
+            <div>
+              <span>In Stock</span>
+              <strong>{inStockProducts}</strong>
+            </div>
+
+          </div>
+
+          <div className="products-summary-card">
+
+            <div className="products-summary-icon amber">
+              <TriangleAlert size={20} />
+            </div>
+
+            <div>
+              <span>Low Stock</span>
+              <strong>{lowStockProducts}</strong>
+            </div>
+
+          </div>
+
+          <div className="products-summary-card">
+
+            <div className="products-summary-icon red">
+              <PackageX size={20} />
+            </div>
+
+            <div>
+              <span>Out of Stock</span>
+              <strong>{outOfStockProducts}</strong>
+            </div>
+
+          </div>
+
+        </section>
+
+        {/* =====================================================
+            SEARCH / FILTER BAR
+        ===================================================== */}
+
+        <section className="products-toolbar">
+
+          <div className="products-search">
+
+            <Search size={18} />
+
+            <input
+              type="text"
+              placeholder="Search products..."
+              value={search}
+              onChange={(e) =>
+                setSearch(e.target.value)
+              }
+            />
+
+          </div>
+
+          <div className="products-filter">
+
+            <SlidersHorizontal size={17} />
+
+            <select
+              value={category}
+              onChange={(e) =>
+                setCategory(e.target.value)
+              }
+            >
+              {categories.map((cat) => (
+                <option
+                  key={cat}
+                  value={cat}
+                >
+                  {cat === "All"
+                    ? "All Categories"
+                    : cat}
+                </option>
+              ))}
+            </select>
+
+          </div>
+
+          <div className="products-filter">
+
+            <Boxes size={17} />
+
+            <select
+              value={status}
+              onChange={(e) =>
+                setStatus(e.target.value)
+              }
+            >
+              <option value="All">
+                All Status
               </option>
 
-            ))}
+              <option value="In Stock">
+                In Stock
+              </option>
 
-          </select>
+              <option value="Low Stock">
+                Low Stock
+              </option>
 
-        </div>
+              <option value="Out of Stock">
+                Out of Stock
+              </option>
 
-        <div className="col-md-4">
+            </select>
 
-          <select
-            className="form-select"
-            value={status}
-            onChange={(e) => setStatus(e.target.value)}
+          </div>
+
+          <button
+            type="button"
+            className="products-refresh"
+            onClick={loadProducts}
+            title="Refresh products"
           >
+            <RefreshCw size={18} />
+          </button>
 
-            <option>All</option>
-            <option>In Stock</option>
-            <option>Low Stock</option>
-            <option>Out of Stock</option>
+        </section>
 
-          </select>
+        {/* =====================================================
+            RESULTS INFORMATION
+        ===================================================== */}
 
-        </div>
+        {!loading && !error && (
 
-      </div>
+          <div className="products-results-row">
 
-      {/* Product Cards */}
+            <p>
+              Showing{" "}
+              <strong>
+                {filteredProducts.length}
+              </strong>{" "}
+              of{" "}
+              <strong>
+                {products.length}
+              </strong>{" "}
+              products
+            </p>
 
-      <div className="row">
+          </div>
 
-        {filteredProducts.length > 0 ? (
+        )}
 
-          filteredProducts.map((product) => (
+        {/* =====================================================
+            ERROR
+        ===================================================== */}
 
-            <div
-              className="col-lg-4 col-md-6 mb-4"
-              key={product.id}
+        {error && (
+
+          <div className="products-error">
+
+            <TriangleAlert size={18} />
+
+            <span>{error}</span>
+
+            <button
+              type="button"
+              onClick={loadProducts}
             >
+              Try again
+            </button>
 
-              <div
-                className="card border-0 h-100"
-                style={{
-                  borderRadius: "20px",
-                  boxShadow: "0 10px 30px rgba(0,0,0,.08)"
-                }}
-              >
+          </div>
 
-                <img
-                  src={`http://127.0.0.1:8000/uploads/${product.image}`}
-                  alt={product.product_name}
-                  className="card-img-top"
-                  style={{
-                    height: "220px",
-                    objectFit: "cover",
-                    borderTopLeftRadius: "20px",
-                    borderTopRightRadius: "20px"
-                  }}
-                  onError={(e) => {
-                    e.target.src =
-                      "https://placehold.co/600x350?text=No+Image";
-                  }}
-                />
+        )}
 
-                <div className="card-body">
+        {/* =====================================================
+            LOADING
+        ===================================================== */}
 
-                  <span className="badge bg-primary mb-2">
-                    {product.category}
-                  </span>
+        {loading ? (
 
-                  <h4 className="fw-bold">
-                    {product.product_name}
-                  </h4>
+          <div className="products-loading">
 
-                  <p className="text-muted">
-                    {product.description}
-                  </p>
+            <RefreshCw
+              size={25}
+              className="products-loading-icon"
+            />
 
-                  <h3 style={{ color: "#5B3CC4" }}>
-                    ₹ {product.price}
-                  </h3>
+            <span>Loading products...</span>
 
-                  {product.stock === 0 ? (
+          </div>
 
-                    <span className="badge bg-dark">
-                      Out of Stock
+        ) : filteredProducts.length > 0 ? (
+
+          /* ===================================================
+             PRODUCT GRID
+          =================================================== */
+
+          <section className="products-grid">
+
+            {filteredProducts.map((product) => {
+
+              const stockStatus =
+                getStockStatus(product.stock);
+
+              return (
+
+                <article
+                  className="product-card"
+                  key={product.id}
+                >
+
+                  {/* IMAGE */}
+
+                  <div className="product-image-wrapper">
+
+                    <img
+                      src={`http://127.0.0.1:8000/uploads/${product.image}`}
+                      alt={product.product_name}
+                      className="product-image"
+                      onError={(e) => {
+                        e.currentTarget.style.display =
+                          "none";
+
+                        e.currentTarget
+                          .nextElementSibling
+                          ?.classList.add("show");
+                      }}
+                    />
+
+                    <div className="product-image-fallback">
+                      <Package size={40} />
+
+                      <span>
+                        No image available
+                      </span>
+                    </div>
+
+                    <span className="product-category">
+                      {product.category ||
+                        "Uncategorized"}
                     </span>
 
-                  ) : product.stock < 10 ? (
+                  </div>
 
-                    <span className="badge bg-danger">
-                      Low Stock ({product.stock})
-                    </span>
+                  {/* CONTENT */}
 
-                  ) : (
+                  <div className="product-card-content">
 
-                    <span className="badge bg-success">
-                      In Stock ({product.stock})
-                    </span>
+                    <div className="product-card-heading">
 
-                  )}
+                      <div>
 
-                </div>
+                        <h3>
+                          {product.product_name}
+                        </h3>
 
-                <div className="card-footer bg-white border-0">
+                        <span
+                          className={`product-stock-status ${stockStatus.className}`}
+                        >
+                          {stockStatus.label}
+                        </span>
 
-                  <div className="d-flex justify-content-between">
+                      </div>
+
+                      <strong className="product-price">
+                        ₹{formatPrice(product.price)}
+                      </strong>
+
+                    </div>
+
+                    <p className="product-description">
+                      {product.description ||
+                        "No description available for this product."}
+                    </p>
+
+                  </div>
+
+                  {/* ACTIONS */}
+
+                  <div className="product-card-actions">
 
                     <button
-                      className="btn btn-outline-primary"
+                      type="button"
+                      className="product-edit-button"
                       onClick={() =>
-                        navigate(`/vendor/edit-product/${product.id}`)
+                        navigate(
+                          `/vendor/edit-product/${product.id}`
+                        )
                       }
                     >
-                      ✏ Edit
+                      <Pencil size={16} />
+                      Edit
                     </button>
 
                     <button
-                      className="btn btn-outline-danger"
+                      type="button"
+                      className="product-delete-button"
                       onClick={() =>
                         deleteProduct(product.id)
                       }
                     >
-                      🗑 Delete
+                      <Trash2 size={16} />
+                      Delete
                     </button>
 
                   </div>
 
-                </div>
+                </article>
 
-              </div>
+              );
+            })}
 
-            </div>
-
-          ))
+          </section>
 
         ) : (
 
-          <div className="col-12">
+          /* ===================================================
+             EMPTY STATE
+          =================================================== */
 
-            <div className="alert alert-info text-center">
+          <div className="products-empty">
 
-              <h5>No Products Found</h5>
-
+            <div className="products-empty-icon">
+              <Package size={30} />
             </div>
+
+            <h3>No products found</h3>
+
+            <p>
+              {search ||
+              category !== "All" ||
+              status !== "All"
+                ? "Try changing your search or filters."
+                : "Add your first product to start building your catalog."}
+            </p>
+
+            {!search &&
+              category === "All" &&
+              status === "All" && (
+
+                <button
+                  type="button"
+                  className="products-add-button"
+                  onClick={() =>
+                    navigate(
+                      "/vendor/add-product"
+                    )
+                  }
+                >
+                  <Plus size={17} />
+
+                  Add Product
+                </button>
+
+              )}
 
           </div>
 
@@ -288,9 +630,7 @@ function ProductList() {
       </div>
 
     </DashboardLayout>
-
   );
-
 }
 
 export default ProductList;

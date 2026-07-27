@@ -1,5 +1,21 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+
+import {
+  Package,
+  Boxes,
+  IndianRupee,
+  TriangleAlert,
+  Sparkles,
+  ArrowUpRight,
+  ChartNoAxesCombined,
+  PieChart,
+  CircleCheck,
+  Lightbulb,
+  Plus,
+  LoaderCircle,
+} from "lucide-react";
+
 import API from "../../services/api";
 
 import DashboardLayout from "../../components/layout/DashboardLayout";
@@ -7,247 +23,615 @@ import SalesChart from "../../components/charts/SalesChart";
 import InventoryChart from "../../components/charts/InventoryChart";
 
 function VendorDashboard() {
-
-  const [stats, setStats] = useState({});
   const navigate = useNavigate();
 
+  /* =========================================================
+     STATE
+  ========================================================= */
+
+  const [stats, setStats] = useState({
+    total_products: 0,
+    total_stock: 0,
+    inventory_value: 0,
+    low_stock_products: 0,
+  });
+
+  const [businessName, setBusinessName] = useState("Vendor");
+
+  const [loading, setLoading] = useState(true);
+
+  const [error, setError] = useState("");
+
+
+  /* =========================================================
+     LOAD BUSINESS NAME
+  ========================================================= */
+
   useEffect(() => {
+    const storedBusinessName =
+      localStorage.getItem("business_name");
 
-    const vendorId = localStorage.getItem("vendor_id");
+    if (
+      storedBusinessName &&
+      storedBusinessName !== "undefined" &&
+      storedBusinessName !== "null"
+    ) {
+      setBusinessName(storedBusinessName);
+    }
+  }, []);
 
-    API.get(`/dashboard/${vendorId}`)
-      .then((res) => {
-        setStats(res.data);
-      })
-      .catch((err) => {
-        console.log(err);
-      });
+
+  /* =========================================================
+     LOAD DASHBOARD DATA
+  ========================================================= */
+
+  useEffect(() => {
+    const fetchDashboard = async () => {
+      try {
+        setLoading(true);
+        setError("");
+
+        const vendorId =
+          localStorage.getItem("vendor_id");
+
+        if (!vendorId) {
+          setError("Vendor session not found.");
+          setLoading(false);
+          return;
+        }
+
+        const res = await API.get(
+          `/dashboard/${vendorId}`
+        );
+
+        setStats({
+          total_products:
+            res.data.total_products || 0,
+
+          total_stock:
+            res.data.total_stock || 0,
+
+          inventory_value:
+            res.data.inventory_value || 0,
+
+          low_stock_products:
+            res.data.low_stock_products || 0,
+        });
+
+      } catch (err) {
+        console.error(
+          "Dashboard fetch error:",
+          err
+        );
+
+        setError(
+          "Unable to load dashboard data."
+        );
+
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDashboard();
 
   }, []);
 
-  return (
 
+  /* =========================================================
+     NUMBER FORMATTER
+  ========================================================= */
+
+  const formatNumber = (value) => {
+    return Number(value || 0).toLocaleString(
+      "en-IN"
+    );
+  };
+
+
+  /* =========================================================
+     CURRENCY FORMATTER
+  ========================================================= */
+
+  const formatCurrency = (value) => {
+    return Number(value || 0).toLocaleString(
+      "en-IN",
+      {
+        maximumFractionDigits: 2,
+      }
+    );
+  };
+
+
+  /* =========================================================
+     LOADING SCREEN
+  ========================================================= */
+
+  if (loading) {
+    return (
+      <DashboardLayout>
+
+        <div className="vendor-loading">
+
+          <LoaderCircle
+            size={25}
+            className="vendor-loading-icon"
+          />
+
+          <span>
+            Loading dashboard...
+          </span>
+
+        </div>
+
+      </DashboardLayout>
+    );
+  }
+
+
+  /* =========================================================
+     DASHBOARD
+  ========================================================= */
+
+  return (
     <DashboardLayout>
 
-      {/* Header */}
+      <div className="vendor-dashboard">
 
-      <div className="mb-5">
 
-        <h2
-          className="fw-bold"
-          style={{ color: "#2D3748" }}
-        >
-          Welcome Back 👋
-        </h2>
+        {/* =====================================================
+            HEADER
+        ===================================================== */}
 
-        <p className="text-muted">
-          Manage your marketplace using AI-powered insights.
-        </p>
+        <header className="vendor-page-header">
 
-      </div>
+          <div className="vendor-welcome">
 
-      {/* KPI Cards */}
+            <div className="vendor-welcome-label">
+              WELCOME BACK
+            </div>
 
-      <div className="row g-4">
-
-        {/* Total Products */}
-
-        <div className="col-lg-3">
-
-          <div
-            className="p-4"
-            style={{
-              background: "linear-gradient(135deg,#5B3CC4,#7C3AED)",
-              color: "white",
-              borderRadius: "20px",
-              boxShadow: "0 15px 35px rgba(91,60,196,.25)"
-            }}
-          >
-
-            <h6>📦 Total Products</h6>
-
-            <h1 className="fw-bold mt-3">
-              {stats.total_products || 0}
+            <h1>
+              Hi, {businessName} 👋
             </h1>
 
-            <small>Products available</small>
+            <p>
+              Here's what's happening with your
+              marketplace today.
+            </p>
 
           </div>
 
-        </div>
 
-        {/* Total Stock */}
-
-        <div className="col-lg-3">
-
-          <div
-            className="p-4"
-            style={{
-              background: "#ffffff",
-              borderRadius: "20px",
-              boxShadow: "0 10px 30px rgba(0,0,0,.08)"
-            }}
+          <button
+            type="button"
+            className="vendor-primary-button"
+            onClick={() =>
+              navigate("/vendor/add-product")
+            }
           >
 
-            <h6>📋 Total Stock</h6>
+            <Plus size={18} />
 
-            <h1
-              className="fw-bold mt-3"
-              style={{ color: "#5B3CC4" }}
+            <span>
+              Add Product
+            </span>
+
+          </button>
+
+        </header>
+
+
+        {/* =====================================================
+            ERROR MESSAGE
+        ===================================================== */}
+
+        {error && (
+
+          <div className="vendor-error-message">
+
+            <TriangleAlert size={18} />
+
+            <span>
+              {error}
+            </span>
+
+          </div>
+
+        )}
+
+
+        {/* =====================================================
+            KPI CARDS
+        ===================================================== */}
+
+        <section className="vendor-stat-grid">
+
+
+          {/* TOTAL PRODUCTS */}
+
+          <article className="vendor-stat-card">
+
+            <div className="vendor-stat-top">
+
+              <div className="vendor-stat-icon indigo">
+
+                <Package size={21} />
+
+              </div>
+
+              <span className="vendor-stat-label">
+                Total Products
+              </span>
+
+            </div>
+
+            <div className="vendor-stat-value">
+
+              {formatNumber(
+                stats.total_products
+              )}
+
+            </div>
+
+            <div className="vendor-stat-description">
+              Products in your catalog
+            </div>
+
+          </article>
+
+
+          {/* TOTAL STOCK */}
+
+          <article className="vendor-stat-card">
+
+            <div className="vendor-stat-top">
+
+              <div className="vendor-stat-icon blue">
+
+                <Boxes size={21} />
+
+              </div>
+
+              <span className="vendor-stat-label">
+                Total Stock
+              </span>
+
+            </div>
+
+            <div className="vendor-stat-value">
+
+              {formatNumber(
+                stats.total_stock
+              )}
+
+            </div>
+
+            <div className="vendor-stat-description">
+              Units currently in inventory
+            </div>
+
+          </article>
+
+
+          {/* INVENTORY VALUE */}
+
+          <article className="vendor-stat-card">
+
+            <div className="vendor-stat-top">
+
+              <div className="vendor-stat-icon green">
+
+                <IndianRupee size={21} />
+
+              </div>
+
+              <span className="vendor-stat-label">
+                Inventory Value
+              </span>
+
+            </div>
+
+            <div className="vendor-stat-value">
+
+              ₹{formatCurrency(
+                stats.inventory_value
+              )}
+
+            </div>
+
+            <div className="vendor-stat-description">
+              Total value of your inventory
+            </div>
+
+          </article>
+
+
+          {/* LOW STOCK */}
+
+          <article className="vendor-stat-card">
+
+            <div className="vendor-stat-top">
+
+              <div className="vendor-stat-icon red">
+
+                <TriangleAlert size={21} />
+
+              </div>
+
+              <span className="vendor-stat-label">
+                Low Stock
+              </span>
+
+            </div>
+
+            <div className="vendor-stat-value">
+
+              {formatNumber(
+                stats.low_stock_products
+              )}
+
+            </div>
+
+            <div className="vendor-stat-description">
+              Products need restocking
+            </div>
+
+          </article>
+
+        </section>
+
+
+        {/* =====================================================
+            CHARTS
+        ===================================================== */}
+
+        <section className="vendor-chart-section">
+
+
+          {/* SALES PERFORMANCE */}
+
+          <div className="vendor-chart-large">
+
+            <div className="vendor-panel">
+
+              <div className="vendor-panel-header">
+
+                <div className="vendor-panel-title-row">
+
+                  <div className="vendor-panel-icon">
+
+                    <ChartNoAxesCombined
+                      size={20}
+                    />
+
+                  </div>
+
+                  <div>
+
+                    <h3>
+                      Sales Performance
+                    </h3>
+
+                    <p>
+                      Weekly sales trend
+                    </p>
+
+                  </div>
+
+                </div>
+
+
+                <button
+                  type="button"
+                  className="vendor-panel-link"
+                  onClick={() =>
+                    navigate(
+                      "/vendor/analytics"
+                    )
+                  }
+                >
+
+                  View Analytics
+
+                  <ArrowUpRight
+                    size={14}
+                  />
+
+                </button>
+
+              </div>
+
+
+              <SalesChart />
+
+            </div>
+
+          </div>
+
+
+          {/* INVENTORY OVERVIEW */}
+
+          <div className="vendor-chart-small">
+
+            <div className="vendor-panel">
+
+              <div className="vendor-panel-header">
+
+                <div className="vendor-panel-title-row">
+
+                  <div className="vendor-panel-icon">
+
+                    <PieChart size={20} />
+
+                  </div>
+
+                  <div>
+
+                    <h3>
+                      Inventory Overview
+                    </h3>
+
+                    <p>
+                      Products by category
+                    </p>
+
+                  </div>
+
+                </div>
+
+              </div>
+
+
+              <InventoryChart />
+
+            </div>
+
+          </div>
+
+        </section>
+
+
+        {/* =====================================================
+            MARKETPLACE INSIGHTS
+        ===================================================== */}
+
+        <section className="vendor-panel vendor-insights-panel">
+
+          <div className="vendor-panel-header">
+
+            <div className="vendor-panel-title-row">
+
+              <div className="vendor-panel-icon">
+
+                <Sparkles size={20} />
+
+              </div>
+
+              <div>
+
+                <h3>
+                  Marketplace Insights
+                </h3>
+
+                <p>
+                  Smart recommendations for your store
+                </p>
+
+              </div>
+
+            </div>
+
+
+            <button
+              type="button"
+              className="vendor-panel-link"
+              onClick={() =>
+                navigate(
+                  "/vendor/ai-dashboard"
+                )
+              }
             >
-              {stats.total_stock || 0}
-            </h1>
 
-            <small>Items currently in inventory</small>
+              Open AI Dashboard
 
-          </div>
+              <ArrowUpRight
+                size={14}
+              />
 
-        </div>
-
-        {/* Inventory Value */}
-
-        <div className="col-lg-3">
-
-          <div
-            className="p-4"
-            style={{
-              background: "linear-gradient(135deg,#10B981,#059669)",
-              color: "white",
-              borderRadius: "20px",
-              boxShadow: "0 15px 35px rgba(16,185,129,.25)"
-            }}
-          >
-
-            <h6>💰 Inventory Value</h6>
-
-            <h1 className="fw-bold mt-3">
-              ₹ {stats.inventory_value || 0}
-            </h1>
-
-            <small>Total inventory worth</small>
+            </button>
 
           </div>
 
-        </div>
 
-        {/* Low Stock */}
+          <div className="vendor-insight-list">
 
-        <div className="col-lg-3">
 
-          <div
-            className="p-4"
-            style={{
-              background: "linear-gradient(135deg,#EF4444,#DC2626)",
-              color: "white",
-              borderRadius: "20px",
-              boxShadow: "0 15px 35px rgba(239,68,68,.25)"
-            }}
-          >
+            {/* INSIGHT 1 */}
 
-            <h6>⚠️ Low Stock Products</h6>
+            <div className="vendor-insight-item">
 
-            <h1 className="fw-bold mt-3">
-              {stats.low_stock_products || 0}
-            </h1>
+              <div className="vendor-insight-icon success">
 
-            <small>Products below 10 units</small>
+                <CircleCheck size={18} />
+
+              </div>
+
+              <div>
+
+                <h6>
+                  Inventory health looks good
+                </h6>
+
+                <p>
+                  Most products have healthy
+                  stock levels.
+                </p>
+
+              </div>
+
+            </div>
+
+
+            {/* INSIGHT 2 */}
+
+            <div className="vendor-insight-item">
+
+              <div className="vendor-insight-icon warning">
+
+                <TriangleAlert size={18} />
+
+              </div>
+
+              <div>
+
+                <h6>
+                  Watch low-stock items
+                </h6>
+
+                <p>
+                  Restock products below 10
+                  units to avoid missed sales.
+                </p>
+
+              </div>
+
+            </div>
+
+
+            {/* INSIGHT 3 */}
+
+            <div className="vendor-insight-item">
+
+              <div className="vendor-insight-icon info">
+
+                <Lightbulb size={18} />
+
+              </div>
+
+              <div>
+
+                <h6>
+                  Grow your catalog
+                </h6>
+
+                <p>
+                  Adding relevant products can
+                  improve marketplace reach.
+                </p>
+
+              </div>
+
+            </div>
 
           </div>
 
-        </div>
-
-      </div>
-
-      {/* AI Insights */}
-
-      <div className="mt-5">
-
-        <div
-          className="p-4"
-          style={{
-            background: "#ffffff",
-            borderRadius: "20px",
-            boxShadow: "0 10px 30px rgba(0,0,0,.08)"
-          }}
-        >
-
-          <h4 className="mb-3">
-            🤖 AI Marketplace Insights
-          </h4>
-
-          <div className="alert alert-success">
-            ✅ Inventory health is good.
-          </div>
-
-          <div className="alert alert-warning">
-            ⚠️ Products with stock below <strong>10</strong> should be restocked.
-          </div>
-
-          <div className="alert alert-info">
-            📈 Continue adding products to improve marketplace performance.
-          </div>
-
-        </div>
-
-      </div>
-
-      {/* Quick Actions */}
-
-      <div className="row mt-4 g-3">
-
-        <div className="col-md-4">
-
-          <button
-            className="btn btn-primary w-100 p-3"
-            onClick={() => navigate("/vendor/add-product")}
-          >
-            ➕ Add Product
-          </button>
-
-        </div>
-
-        <div className="col-md-4">
-
-          <button
-            className="btn btn-dark w-100 p-3"
-            onClick={() => navigate("/vendor/products")}
-          >
-            📦 View Products
-          </button>
-
-        </div>
-
-        <div className="col-md-4">
-
-          <button
-            className="btn btn-success w-100 p-3"
-            onClick={() => navigate("/vendor/reports")}
-          >
-            📈 View Reports
-          </button>
-
-        </div>
-
-      </div>
-
-      {/* Charts */}
-
-      <div className="row mt-5">
-
-        <div className="col-lg-8">
-          <SalesChart />
-        </div>
-
-        <div className="col-lg-4">
-          <InventoryChart />
-        </div>
+        </section>
 
       </div>
 
     </DashboardLayout>
-
   );
-
 }
 
 export default VendorDashboard;

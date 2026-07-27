@@ -1,73 +1,120 @@
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import {
+  LayoutDashboard,
+  Package,
+  PackagePlus,
+  ClipboardList,
+  CreditCard,
+  FileChartColumn,
+  ChartNoAxesCombined,
+  CircleDollarSign,
+  Trophy,
+  TrendingUp,
+  BrainCircuit,
+  LogOut,
+  Store,
+} from "lucide-react";
+
+import {
+  Link,
+  useLocation,
+  useNavigate,
+} from "react-router-dom";
+
+import "../../styles/dashboard.css";
 
 function DashboardLayout({ children }) {
 
   const location = useLocation();
   const navigate = useNavigate();
 
-  const menuItems = [
+  const menuGroups = [
 
     {
-      name: "Dashboard",
-      icon: "🏠",
-      path: "/vendor/dashboard"
+      title: "OVERVIEW",
+
+      items: [
+        {
+          name: "Dashboard",
+          icon: LayoutDashboard,
+          path: "/vendor/dashboard",
+        },
+      ],
     },
 
     {
-      name: "Products",
-      icon: "📦",
-      path: "/vendor/products"
+      title: "STORE MANAGEMENT",
+
+      items: [
+        {
+          name: "Products",
+          icon: Package,
+          path: "/vendor/products",
+        },
+
+        {
+          name: "Add Product",
+          icon: PackagePlus,
+          path: "/vendor/add-product",
+        },
+
+        {
+          name: "Inventory",
+          icon: ClipboardList,
+          path: "/vendor/inventory",
+        },
+
+        {
+          name: "Transactions",
+          icon: CreditCard,
+          path: "/vendor/transactions",
+        },
+      ],
     },
 
     {
-      name: "Add Product",
-      icon: "➕",
-      path: "/vendor/add-product"
-    },
+      title: "INSIGHTS",
 
-    {
-      name: "Inventory",
-      icon: "📋",
-      path: "/vendor/inventory"
-    },
+      items: [
+        {
+          name: "Reports",
+          icon: FileChartColumn,
+          path: "/vendor/reports",
+        },
 
-    {
-      name: "Transactions",
-      icon: "💳",
-      path: "/vendor/transactions"
-    },
+        {
+          name: "Analytics",
+          icon: ChartNoAxesCombined,
+          path: "/vendor/analytics",
+        },
 
-    {
-  name: "Reports",
-  icon: "📈",
-  path: "/vendor/reports"
-},
-{
-  name: "Analytics",
-  icon: "📊",
-  path: "/vendor/analytics"
-},
-{
-  name: "Revenue Analytics",
-  icon: "💰",
-  path: "/vendor/revenue-analytics"
-},{
-  name: "Marketplace Benchmark",
-  icon: "🏆",
-  path: "/vendor/marketplace-benchmark"
-}
-,{
-  name: "Sales Forecast",
-  icon: "🤖",
-  path: "/vendor/sales-forecast"
-},
-{
-    name: "AI Dashboard",
-    icon: "🤖",
-    path: "/vendor/ai-dashboard"
-}
+        {
+          name: "Revenue Analytics",
+          icon: CircleDollarSign,
+          path: "/vendor/revenue-analytics",
+        },
+
+        {
+          name: "Marketplace Benchmark",
+          icon: Trophy,
+          path: "/vendor/marketplace-benchmark",
+        },
+
+        {
+          name: "Sales Forecast",
+          icon: TrendingUp,
+          path: "/vendor/sales-forecast",
+        },
+
+        {
+          name: "AI Dashboard",
+          icon: BrainCircuit,
+          path: "/vendor/ai-dashboard",
+        },
+      ],
+    },
 
   ];
+
 
   const logout = () => {
 
@@ -77,108 +124,130 @@ function DashboardLayout({ children }) {
 
   };
 
+
   return (
 
-    <div
-      className="d-flex"
-      style={{
-        minHeight: "100vh",
-        background: "#F4F7FC"
-      }}
-    >
+    <div className="ss-app">
 
-      {/* Sidebar */}
+      {/* SIDEBAR */}
 
-      <div
-        style={{
-          width: "260px",
-          background: "#5B3CC4",
-          color: "white",
-          padding: "30px 20px"
-        }}
-      >
+      <aside className="ss-sidebar">
 
-        <h2
-          className="fw-bold text-center mb-5"
-        >
-          ShopSense
-        </h2>
+        {/* LOGO */}
 
-        {
+        <div className="ss-logo">
 
-          menuItems.map((item) => (
+          <div className="ss-logo-icon">
 
-            <Link
-              key={item.path}
-              to={item.path}
-              className="text-decoration-none"
+            <Store size={21} />
+
+          </div>
+
+          <div>
+
+            <h2>
+              ShopSense
+            </h2>
+
+            <span>
+              Vendor Portal
+            </span>
+
+          </div>
+
+        </div>
+
+
+        {/* NAVIGATION */}
+
+        <nav className="ss-nav">
+
+          {menuGroups.map((group) => (
+
+            <div
+              className="ss-nav-group"
+              key={group.title}
             >
 
-              <div
+              <p className="ss-nav-title">
 
-                style={{
+                {group.title}
 
-                  padding: "14px 18px",
+              </p>
 
-                  borderRadius: "12px",
 
-                  marginBottom: "10px",
+              {group.items.map((item) => {
 
-                  background:
+                const Icon = item.icon;
 
-                    location.pathname === item.path
-                      ? "rgba(255,255,255,.18)"
-                      : "transparent",
+                const active =
+                  location.pathname === item.path;
 
-                  color: "white",
 
-                  transition: ".3s"
+                return (
 
-                }}
+                  <Link
+                    key={item.path}
+                    to={item.path}
+                    className={
+                      `ss-nav-link ${
+                        active ? "active" : ""
+                      }`
+                    }
+                  >
 
-              >
+                    <Icon size={18} />
 
-                <span
-                  style={{
-                    marginRight: "10px"
-                  }}
-                >
-                  {item.icon}
-                </span>
+                    <span>
+                      {item.name}
+                    </span>
 
-                {item.name}
+                  </Link>
 
-              </div>
+                );
 
-            </Link>
+              })}
 
-          ))
+            </div>
 
-        }
+          ))}
 
-        <button
+        </nav>
 
-          className="btn btn-danger w-100 mt-5"
 
-          onClick={logout}
+        {/* LOGOUT */}
 
-        >
+        <div className="ss-sidebar-footer">
 
-          Logout
+          <button
+            className="ss-logout"
+            onClick={logout}
+          >
 
-        </button>
+            <LogOut size={18} />
 
-      </div>
+            <span>
+              Logout
+            </span>
 
-      {/* Main Content */}
+          </button>
 
-      <div
-        className="flex-grow-1 p-4"
-      >
+        </div>
 
-        {children}
+      </aside>
 
-      </div>
+
+      {/* MAIN CONTENT */}
+
+      <main className="ss-main">
+
+        <div className="ss-page-container">
+
+          {children}
+
+        </div>
+
+      </main>
 
     </div>
 

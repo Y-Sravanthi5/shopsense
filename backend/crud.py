@@ -1,11 +1,21 @@
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 
+
 import models
 import schemas
 import numpy as np
 from sklearn.linear_model import LinearRegression
+import os
+import mlflow
+import mlflow.sklearn
+MLFLOW_DB_PATH = os.path.abspath("mlflow.db")
 
+mlflow.set_tracking_uri(
+    f"sqlite:///{MLFLOW_DB_PATH.replace(os.sep, '/')}"
+)
+
+from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 
 
 # =====================================================
@@ -1458,35 +1468,182 @@ def ml_sales_forecast(db: Session, vendor_id: int):
         .all()
     )
 
-    if len(sales) == 0:
-        return {
-            "labels": [],
-            "revenue": [],
-            "prediction": 0
-        }
-
     labels = []
     revenue = []
 
-    for i, (_, amount) in enumerate(sales):
-        labels.append(i + 1)
+    for day, amount in sales:
+        labels.append(str(day))
         revenue.append(float(amount))
 
-    if len(revenue) < 2:
-        prediction = revenue[-1]
+    # -----------------------------------------
+    # No sales data
+    # -----------------------------------------
+
+    if len(revenue) == 0:
+
+        return {
+            "labels": [],
+            "revenue": [],
+            "prediction": 0,
+            "model": "Insufficient data"
+        }
+
+    # -----------------------------------------
+    # Only one data point
+    # Cannot train Linear Regression properly
+    # -----------------------------------------
+
+    if len(revenue) == 1:
+
+        return {
+            "labels": labels,
+            "revenue": revenue,
+            "prediction": round(revenue[0], 2),
+            "model": "Insufficient data for Linear Regression"
+        }
+
+    # -----------------------------------------
+    # Prepare training data
+    # -----------------------------------------
+
+    import numpy as np
+
+    X = np.arange(len(revenue)).reshape(-1, 1)
+    y = np.array(revenue)
+
+    model = LinearRegression()
+
+    model.fit(X, y)
+
+    # -----------------------------------------
+    # Training predictions for evaluation
+    # -----------------------------------------
+
+    training_predictions = model.predict(X)
+
+    mae = mean_absolute_error(
+        y,
+        training_predictions
+    )
+
+    mse = mean_squared_error(
+        y,
+        training_predictions
+    )
+
+    rmse = np.sqrt(mse)
+
+    # R2 requires at least 2 samples,
+    # but it is more meaningful with > 2.
+    if len(y) > 2:
+        r2 = r2_score(
+            y,
+            training_predictions
+        )
     else:
-        X = np.array(labels).reshape(-1, 1)
-        y = np.array(revenue)
+        r2 = 0
 
-        model = LinearRegression()
-        model.fit(X, y)
+    # -----------------------------------------
+    # Predict next sales period
+    # -----------------------------------------
 
-        prediction = model.predict([[len(labels) + 1]])[0]
+    next_period = np.array(
+        [[len(revenue)]]
+    )
+
+    predicted = model.predict(
+        next_period
+    )[0]
+
+    # Revenue should not be negative
+    predicted = max(0, predicted)
+
+    # =========================================
+    # MLFLOW TRACKING
+    # =========================================
+
+    mlflow.set_experiment(
+        "ShopSense-Sales-Forecasting"
+    )
+
+    with mlflow.start_run():
+
+        # -----------------------------
+        # Parameters
+        # -----------------------------
+
+        mlflow.log_param(
+            "vendor_id",
+            vendor_id
+        )
+
+        mlflow.log_param(
+            "algorithm",
+            "LinearRegression"
+        )
+
+        mlflow.log_param(
+            "training_points",
+            len(revenue)
+        )
+
+        # -----------------------------
+        # Metrics
+        # -----------------------------
+
+        mlflow.log_metric(
+            "MAE",
+            float(mae)
+        )
+
+        mlflow.log_metric(
+            "RMSE",
+            float(rmse)
+        )
+
+        mlflow.log_metric(
+            "R2",
+            float(r2)
+        )
+
+        mlflow.log_metric(
+            "predicted_revenue",
+            float(predicted)
+        )
+
+        # -----------------------------
+        # Store model
+        # -----------------------------
+
+        mlflow.sklearn.log_model(
+    sk_model=model,
+    name="sales_forecast_model",
+    registered_model_name="ShopSense-Sales-Forecast-Model"
+)
+    # -----------------------------------------
+    # API Response
+    # -----------------------------------------
 
     return {
         "labels": labels,
         "revenue": revenue,
-        "prediction": round(float(prediction), 2)
+
+        "prediction":
+            round(float(predicted), 2),
+
+        "model":
+            "Linear Regression",
+
+        "metrics": {
+            "mae":
+                round(float(mae), 2),
+
+            "rmse":
+                round(float(rmse), 2),
+
+            "r2":
+                round(float(r2), 4)
+        }
     }
 def get_vendor_products(db: Session, vendor_id: int):
     return (

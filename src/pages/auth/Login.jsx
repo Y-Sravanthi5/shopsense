@@ -3,91 +3,99 @@ import { useNavigate, Link } from "react-router-dom";
 import API from "../../services/api";
 
 function Login() {
-
   const navigate = useNavigate();
 
   const [vendor, setVendor] = useState({
     email: "",
-    password: ""
+    password: "",
   });
+
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
     setVendor({
       ...vendor,
-      [e.target.name]: e.target.value
+      [e.target.name]: e.target.value,
     });
   };
 
   const handleSubmit = async (e) => {
-
     e.preventDefault();
 
-    console.log("Login button clicked");
-    console.log(vendor);
-
     try {
+      setLoading(true);
 
       const res = await API.post("/login", vendor);
 
-      console.log("Response:", res.data);
+      console.log("Login Response:", res.data);
 
       if (res.data.message === "Login Successful") {
-
-        localStorage.setItem("vendor_id", res.data.vendor_id);
+        // Store logged-in vendor information
+        localStorage.setItem(
+          "vendor_id",
+          res.data.vendor_id
+        );
 
         localStorage.setItem(
           "business_name",
-          res.data.business_name
+          res.data.business_name || "Vendor"
         );
 
         alert("Login Successful");
 
         navigate("/vendor/dashboard");
-
       } else {
-
-        alert(res.data.message);
-
+        alert(res.data.message || "Login Failed");
       }
-
     } catch (err) {
+      console.error("Login Error:", err);
 
-      console.log("Error:", err);
-
-      alert("Login Failed");
-
+      alert(
+        err.response?.data?.detail ||
+        err.response?.data?.message ||
+        "Login Failed"
+      );
+    } finally {
+      setLoading(false);
     }
-
   };
 
   return (
-
     <div
       className="container-fluid"
       style={{
         minHeight: "100vh",
-        background: "linear-gradient(135deg,#5B3CC4,#7C3AED)"
+        background:
+          "linear-gradient(135deg, #7657E8, #8B6FE8)",
       }}
     >
-
       <div className="row">
 
-        {/* Left Side */}
+        {/* LEFT SIDE */}
 
         <div
-          className="col-lg-6 d-flex justify-content-center align-items-center"
+          className="
+            col-lg-6
+            d-flex
+            justify-content-center
+            align-items-center
+          "
           style={{
             color: "white",
-            minHeight: "100vh"
+            minHeight: "100vh",
           }}
         >
-
-          <div style={{ maxWidth: "500px" }}>
-
+          <div
+            style={{
+              maxWidth: "500px",
+              padding: "30px",
+            }}
+          >
             <h1
               className="fw-bold"
               style={{
-                fontSize: "55px"
+                fontSize: "55px",
+                color: "white",
               }}
             >
               Welcome Back 👋
@@ -97,109 +105,182 @@ function Login() {
               className="mt-4"
               style={{
                 fontSize: "20px",
-                lineHeight: "35px"
+                lineHeight: "35px",
+                color: "rgba(255,255,255,0.85)",
               }}
             >
               Login to manage your products,
-              inventory and AI-powered business insights.
+              inventory and AI-powered business
+              insights.
             </p>
-
           </div>
-
         </div>
 
-        {/* Right Side */}
+
+        {/* RIGHT SIDE */}
 
         <div
-          className="col-lg-6 d-flex justify-content-center align-items-center"
+          className="
+            col-lg-6
+            d-flex
+            justify-content-center
+            align-items-center
+          "
           style={{
-            minHeight: "100vh"
+            minHeight: "100vh",
           }}
         >
-
           <div
-            className="card border-0 shadow-lg"
+            className="card border-0"
             style={{
               width: "450px",
-              borderRadius: "25px"
+              borderRadius: "22px",
+              boxShadow:
+                "0 20px 60px rgba(30, 20, 70, 0.18)",
             }}
           >
-
             <div className="card-body p-5">
 
-              <h2
-                className="text-center fw-bold mb-4"
-              >
-                Vendor Login
-              </h2>
+              <div className="text-center mb-4">
+                <h2
+                  className="fw-bold"
+                  style={{
+                    color: "#171827",
+                  }}
+                >
+                  Vendor Login
+                </h2>
+
+                <p
+                  style={{
+                    color: "#858596",
+                    fontSize: "14px",
+                  }}
+                >
+                  Sign in to your ShopSense account
+                </p>
+              </div>
+
 
               <form onSubmit={handleSubmit}>
 
+                {/* EMAIL */}
+
                 <div className="mb-3">
 
-                  <label>Email</label>
+                  <label
+                    className="form-label"
+                    style={{
+                      fontWeight: "600",
+                      color: "#4F5063",
+                    }}
+                  >
+                    Email
+                  </label>
 
                   <input
                     type="email"
                     name="email"
                     className="form-control"
+                    placeholder="Enter your email"
                     value={vendor.email}
                     onChange={handleChange}
                     required
+                    style={{
+                      minHeight: "48px",
+                      borderRadius: "10px",
+                    }}
                   />
 
                 </div>
 
+
+                {/* PASSWORD */}
+
                 <div className="mb-4">
 
-                  <label>Password</label>
+                  <label
+                    className="form-label"
+                    style={{
+                      fontWeight: "600",
+                      color: "#4F5063",
+                    }}
+                  >
+                    Password
+                  </label>
 
                   <input
                     type="password"
                     name="password"
                     className="form-control"
+                    placeholder="Enter your password"
                     value={vendor.password}
                     onChange={handleChange}
                     required
+                    style={{
+                      minHeight: "48px",
+                      borderRadius: "10px",
+                    }}
                   />
 
                 </div>
 
+
+                {/* LOGIN BUTTON */}
+
                 <button
                   type="submit"
                   className="btn w-100"
+                  disabled={loading}
                   style={{
-                    background: "#5B3CC4",
+                    minHeight: "49px",
+                    background:
+                      "linear-gradient(135deg, #7657E8, #6847E8)",
                     color: "white",
-                    padding: "12px"
+                    borderRadius: "10px",
+                    fontWeight: "600",
+                    border: "none",
                   }}
                 >
-                  Login
+                  {loading
+                    ? "Signing in..."
+                    : "Login"}
                 </button>
 
               </form>
 
+
+              {/* REGISTER */}
+
               <p
                 className="text-center mt-4"
+                style={{
+                  color: "#777889",
+                  fontSize: "14px",
+                }}
               >
                 New Vendor?{" "}
-                <Link to="/register">
+
+                <Link
+                  to="/register"
+                  style={{
+                    color: "#7657E8",
+                    fontWeight: "600",
+                    textDecoration: "none",
+                  }}
+                >
                   Register
                 </Link>
+
               </p>
 
             </div>
-
           </div>
-
         </div>
 
       </div>
-
     </div>
-
   );
-
 }
 
 export default Login;

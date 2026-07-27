@@ -1,182 +1,421 @@
 import { Link } from "react-router-dom";
 
-function CustomerDashboard() {
-  return (
-    <div className="container-fluid p-0">
+import {
+  Store,
+  ShoppingBag,
+  Heart,
+  ShoppingCart,
+  PackageCheck,
+  Laptop,
+  Shirt,
+  House,
+  Dumbbell,
+  ArrowRight,
+  Sparkles,
+  ShieldCheck,
+  Truck,
+  BadgePercent,
+} from "lucide-react";
 
-      {/* Hero Section */}
-      <div
-        className="text-white text-center py-5"
-        style={{
-          background: "linear-gradient(90deg,#0d6efd,#6610f2)",
-        }}
-      >
-        <h1 className="fw-bold">Welcome to ShopSense</h1>
-        <p className="lead">
-          Discover amazing products at the best prices.
-        </p>
+import "../../styles/customerDashboard.css";
+
+function CustomerDashboard() {
+  const customerName =
+    localStorage.getItem("customer_name") || "Customer";
+
+  const categories = [
+    {
+      name: "Electronics",
+      icon: Laptop,
+      description: "Devices & accessories",
+    },
+    {
+      name: "Fashion",
+      icon: Shirt,
+      description: "Trending styles",
+    },
+    {
+      name: "Home & Kitchen",
+      icon: House,
+      description: "Everything for your home",
+    },
+    {
+      name: "Sports",
+      icon: Dumbbell,
+      description: "Fitness & sports gear",
+    },
+  ];
+
+  const quickLinks = [
+    {
+      title: "Browse Products",
+      description: "Explore products from our marketplace.",
+      icon: ShoppingBag,
+      path: "/customer/products",
+    },
+    {
+      title: "Wishlist",
+      description: "View products you've saved for later.",
+      icon: Heart,
+      path: "/customer/wishlist",
+    },
+    {
+      title: "My Cart",
+      description: "Review products waiting in your cart.",
+      icon: ShoppingCart,
+      path: "/customer/cart",
+    },
+    {
+      title: "My Orders",
+      description: "View and track your previous orders.",
+      icon: PackageCheck,
+      path: "/customer/orders",
+    },
+  ];
+
+  return (
+    <div className="customer-home">
+
+      {/* ================= NAVBAR ================= */}
+
+      <header className="customer-navbar">
 
         <Link
-          to="/customer/products"
-          className="btn btn-warning btn-lg mt-3"
+          to="/customer/dashboard"
+          className="customer-brand"
         >
-          Shop Now
+          <div className="customer-brand-icon">
+            <Store size={21} />
+          </div>
+
+          <div>
+            <strong>ShopSense</strong>
+            <span>Marketplace</span>
+          </div>
         </Link>
-      </div>
 
-      <div className="container mt-5">
+        <nav className="customer-nav-links">
 
-        {/* Categories */}
-        <h3 className="mb-4">Shop by Category</h3>
+          <Link to="/customer/products">
+            Products
+          </Link>
 
-        <div className="row">
+          <Link to="/customer/wishlist">
+            <Heart size={18} />
+            Wishlist
+          </Link>
 
-          <div className="col-md-3 mb-4">
-            <div className="card shadow text-center p-4 h-100">
-              <h1>💻</h1>
-              <h5>Electronics</h5>
-            </div>
+          <Link to="/customer/cart">
+            <ShoppingCart size={18} />
+            Cart
+          </Link>
+
+          <Link to="/customer/orders">
+            Orders
+          </Link>
+
+        </nav>
+
+      </header>
+
+
+      {/* ================= HERO ================= */}
+
+      <section className="customer-hero">
+
+        <div className="customer-hero-content">
+
+          <div className="customer-welcome-badge">
+            <Sparkles size={15} />
+            Welcome back, {customerName}
           </div>
 
-          <div className="col-md-3 mb-4">
-            <div className="card shadow text-center p-4 h-100">
-              <h1>👕</h1>
-              <h5>Fashion</h5>
-            </div>
-          </div>
+          <h1>
+            Discover products
+            <span> you'll love.</span>
+          </h1>
 
-          <div className="col-md-3 mb-4">
-            <div className="card shadow text-center p-4 h-100">
-              <h1>🛋️</h1>
-              <h5>Furniture</h5>
-            </div>
-          </div>
+          <p>
+            Shop smarter with ShopSense. Explore products
+            from trusted sellers and discover great deals
+            across your favourite categories.
+          </p>
 
-          <div className="col-md-3 mb-4">
-            <div className="card shadow text-center p-4 h-100">
-              <h1>🏀</h1>
-              <h5>Sports</h5>
-            </div>
-          </div>
-
-        </div>
-
-        {/* Quick Access */}
-
-        <h3 className="mt-5 mb-4">Quick Access</h3>
-
-        <div className="row">
-
-          <div className="col-md-3 mb-4">
-            <div className="card shadow h-100">
-              <div className="card-body text-center">
-
-                <h2>🛍️</h2>
-
-                <h5>Browse Products</h5>
-
-                <p>View all available products.</p>
-
-                <Link
-                  to="/customer/products"
-                  className="btn btn-primary w-100"
-                >
-                  Browse
-                </Link>
-
-              </div>
-            </div>
-          </div>
-
-          <div className="col-md-3 mb-4">
-            <div className="card shadow h-100">
-              <div className="card-body text-center">
-
-                <h2>❤️</h2>
-
-                <h5>Wishlist</h5>
-
-                <p>Save your favourite products.</p>
-
-                <Link
-                  to="/customer/wishlist"
-                  className="btn btn-danger w-100"
-                >
-                  Wishlist
-                </Link>
-
-              </div>
-            </div>
-          </div>
-
-          <div className="col-md-3 mb-4">
-            <div className="card shadow h-100">
-              <div className="card-body text-center">
-
-                <h2>🛒</h2>
-
-                <h5>My Cart</h5>
-
-                <p>View products in your cart.</p>
-
-                <Link
-                  to="/customer/cart"
-                  className="btn btn-success w-100"
-                >
-                  Cart
-                </Link>
-
-              </div>
-            </div>
-          </div>
-
-          <div className="col-md-3 mb-4">
-            <div className="card shadow h-100">
-              <div className="card-body text-center">
-
-                <h2>📦</h2>
-
-                <h5>Orders</h5>
-
-                <p>Track your previous orders.</p>
-
-                <Link
-                  to="/customer/orders"
-                  className="btn btn-warning w-100"
-                >
-                  Orders
-                </Link>
-
-              </div>
-            </div>
-          </div>
-
-        </div>
-
-        {/* Offers */}
-
-        <div className="card mt-5 bg-light shadow">
-          <div className="card-body text-center">
-
-            <h3 className="text-primary">
-              🔥 Special Offer
-            </h3>
-
-            <p className="lead">
-              Flat <strong>20% OFF</strong> on selected products this week!
-            </p>
+          <div className="customer-hero-actions">
 
             <Link
               to="/customer/products"
-              className="btn btn-outline-primary"
+              className="customer-primary-btn"
             >
-              Explore Deals
+              Start Shopping
+              <ArrowRight size={17} />
+            </Link>
+
+            <Link
+              to="/customer/orders"
+              className="customer-secondary-btn"
+            >
+              View Orders
             </Link>
 
           </div>
+
         </div>
 
-      </div>
+
+        {/* HERO RIGHT SIDE */}
+
+        <div className="customer-hero-visual">
+
+          <div className="customer-shopping-icon">
+            <ShoppingBag size={55} />
+          </div>
+
+          <div className="customer-hero-stat stat-one">
+            <BadgePercent size={19} />
+
+            <div>
+              <strong>Great Deals</strong>
+              <span>Save more every day</span>
+            </div>
+          </div>
+
+          <div className="customer-hero-stat stat-two">
+            <ShieldCheck size={19} />
+
+            <div>
+              <strong>Trusted Shopping</strong>
+              <span>Shop with confidence</span>
+            </div>
+          </div>
+
+        </div>
+
+      </section>
+
+
+      {/* ================= FEATURES ================= */}
+
+      <section className="customer-features">
+
+        <div className="customer-feature">
+
+          <div className="customer-feature-icon">
+            <Truck size={20} />
+          </div>
+
+          <div>
+            <strong>Easy Shopping</strong>
+            <span>Simple and convenient experience</span>
+          </div>
+
+        </div>
+
+        <div className="customer-feature">
+
+          <div className="customer-feature-icon">
+            <ShieldCheck size={20} />
+          </div>
+
+          <div>
+            <strong>Trusted Sellers</strong>
+            <span>Products from marketplace vendors</span>
+          </div>
+
+        </div>
+
+        <div className="customer-feature">
+
+          <div className="customer-feature-icon">
+            <BadgePercent size={20} />
+          </div>
+
+          <div>
+            <strong>Best Value</strong>
+            <span>Discover competitive prices</span>
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <main className="customer-main">
+
+        {/* ================= CATEGORIES ================= */}
+
+        <section className="customer-section">
+
+          <div className="customer-section-heading">
+
+            <div>
+              <span className="customer-section-label">
+                CATEGORIES
+              </span>
+
+              <h2>Shop by Category</h2>
+
+              <p>
+                Find what you're looking for faster.
+              </p>
+            </div>
+
+            <Link
+              to="/customer/products"
+              className="customer-view-all"
+            >
+              View all
+              <ArrowRight size={15} />
+            </Link>
+
+          </div>
+
+
+          <div className="customer-category-grid">
+
+            {categories.map((category) => {
+              const Icon = category.icon;
+
+              return (
+                <Link
+                  to="/customer/products"
+                  className="customer-category-card"
+                  key={category.name}
+                >
+
+                  <div className="customer-category-icon">
+                    <Icon size={27} />
+                  </div>
+
+                  <h3>{category.name}</h3>
+
+                  <p>{category.description}</p>
+
+                  <span className="customer-category-arrow">
+                    <ArrowRight size={16} />
+                  </span>
+
+                </Link>
+              );
+            })}
+
+          </div>
+
+        </section>
+
+
+        {/* ================= QUICK ACCESS ================= */}
+
+        <section className="customer-section">
+
+          <div className="customer-section-heading">
+
+            <div>
+              <span className="customer-section-label">
+                YOUR SHOPPING
+              </span>
+
+              <h2>Quick Access</h2>
+
+              <p>
+                Everything you need in one place.
+              </p>
+            </div>
+
+          </div>
+
+
+          <div className="customer-quick-grid">
+
+            {quickLinks.map((item) => {
+              const Icon = item.icon;
+
+              return (
+                <Link
+                  to={item.path}
+                  className="customer-quick-card"
+                  key={item.title}
+                >
+
+                  <div className="customer-quick-icon">
+                    <Icon size={23} />
+                  </div>
+
+                  <div className="customer-quick-content">
+
+                    <h3>{item.title}</h3>
+
+                    <p>
+                      {item.description}
+                    </p>
+
+                  </div>
+
+                  <ArrowRight
+                    size={18}
+                    className="customer-quick-arrow"
+                  />
+
+                </Link>
+              );
+            })}
+
+          </div>
+
+        </section>
+
+
+        {/* ================= PROMO ================= */}
+
+        <section className="customer-promo">
+
+          <div className="customer-promo-icon">
+            <BadgePercent size={29} />
+          </div>
+
+          <div className="customer-promo-content">
+
+            <span>LIMITED TIME DEALS</span>
+
+            <h2>
+              Discover today's best offers
+            </h2>
+
+            <p>
+              Explore products and find great prices across
+              the ShopSense marketplace.
+            </p>
+
+          </div>
+
+          <Link
+            to="/customer/products"
+            className="customer-promo-button"
+          >
+            Explore Deals
+            <ArrowRight size={16} />
+          </Link>
+
+        </section>
+
+      </main>
+
+
+      {/* ================= FOOTER ================= */}
+
+      <footer className="customer-footer">
+
+        <div className="customer-footer-brand">
+          <Store size={18} />
+
+          <strong>ShopSense</strong>
+        </div>
+
+        <p>
+          Smart shopping. Better choices.
+        </p>
+
+      </footer>
 
     </div>
   );

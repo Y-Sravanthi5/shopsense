@@ -1,0 +1,540 @@
+/* ==========================================
+   REVENUE ANALYTICS
+========================================== */
+
+.revenue-page {
+  width: 100%;
+  padding: 30px 38px 45px;
+  box-sizing: border-box;
+}
+
+
+/* ==========================================
+   HEADER
+========================================== */
+
+.revenue-header {
+  margin-bottom: 25px;
+}
+
+.revenue-eyebrow {
+  margin: 0 0 5px;
+  color: #7657e8;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 1.1px;
+}
+
+.revenue-header h1 {
+  margin: 0;
+  color: #171725;
+  font-size: 31px;
+  font-weight: 750;
+  letter-spacing: -0.7px;
+}
+
+.revenue-subtitle {
+  margin-top: 6px;
+  color: #777487;
+  font-size: 15px;
+}
+
+
+/* ==========================================
+   KPI GRID
+========================================== */
+
+.revenue-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.revenue-kpi-card {
+  min-height: 130px;
+
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+
+  padding: 22px;
+
+  background: #ffffff;
+
+  border: 1px solid #ebe9f1;
+  border-radius: 15px;
+
+  box-shadow:
+    0 4px 16px rgba(31, 26, 56, 0.05);
+}
+
+.revenue-kpi-icon {
+  width: 42px;
+  height: 42px;
+
+  flex-shrink: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 11px;
+}
+
+.revenue-kpi-icon.violet {
+  background: #f0ebff;
+  color: #7657e8;
+}
+
+.revenue-kpi-icon.blue {
+  background: #eef1ff;
+  color: #6268ef;
+}
+
+.revenue-kpi-card span {
+  display: block;
+
+  margin-bottom: 7px;
+
+  color: #716d7c;
+
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.revenue-kpi-card h2 {
+  margin: 0 0 5px;
+
+  color: #11111c;
+
+  font-size: 23px;
+  font-weight: 750;
+
+  line-height: 1.2;
+}
+
+.revenue-kpi-card p {
+  margin: 0;
+
+  color: #a09baa;
+
+  font-size: 12px;
+}
+
+
+/* ==========================================
+   GROWTH PANEL
+========================================== */
+
+.growth-panel {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 25px;
+
+  padding: 20px 24px;
+
+  margin-bottom: 18px;
+
+  background: #ffffff;
+
+  border: 1px solid #ebe9f1;
+  border-radius: 15px;
+
+  box-shadow:
+    0 4px 16px rgba(31, 26, 56, 0.04);
+}
+
+.growth-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  min-width: 200px;
+}
+
+.growth-title-icon {
+  width: 40px;
+  height: 40px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: #f0ebff;
+  color: #7657e8;
+
+  border-radius: 10px;
+}
+
+.growth-title h3 {
+  margin: 0 0 3px;
+
+  color: #171725;
+
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.growth-title p {
+  margin: 0;
+
+  color: #9691a2;
+
+  font-size: 12px;
+}
+
+.growth-metrics {
+  flex: 1;
+
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.growth-item {
+  min-width: 180px;
+  padding: 0 24px;
+}
+
+.growth-item span {
+  display: block;
+
+  margin-bottom: 4px;
+
+  color: #8b8795;
+
+  font-size: 12px;
+}
+
+.growth-item strong {
+  color: #171725;
+
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.growth-divider {
+  width: 1px;
+  height: 38px;
+
+  background: #ebe8f0;
+}
+
+.growth-number.positive {
+  color: #0a9f70;
+}
+
+.growth-number.negative {
+  color: #e04f5f;
+}
+
+.growth-number.neutral {
+  color: #777487;
+}
+
+
+/* ==========================================
+   CHART GRID
+========================================== */
+
+.revenue-chart-grid {
+  display: grid;
+
+  grid-template-columns:
+    minmax(0, 1.45fr)
+    minmax(320px, 0.9fr);
+
+  gap: 18px;
+
+  margin-bottom: 18px;
+}
+
+.analytics-chart-card {
+  min-width: 0;
+
+  padding: 22px;
+
+  background: #ffffff;
+
+  border: 1px solid #ebe9f1;
+  border-radius: 15px;
+
+  box-shadow:
+    0 4px 16px rgba(31, 26, 56, 0.05);
+}
+
+.chart-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  margin-bottom: 16px;
+}
+
+.chart-card-header h3 {
+  margin: 0 0 4px;
+
+  color: #171725;
+
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.chart-card-header p {
+  margin: 0;
+
+  color: #9691a2;
+
+  font-size: 12px;
+}
+
+.chart-header-icon {
+  width: 38px;
+  height: 38px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: #f0ebff;
+  color: #7657e8;
+
+  border-radius: 10px;
+}
+
+.revenue-chart-area {
+  position: relative;
+
+  width: 100%;
+  height: 300px;
+}
+
+.chart-empty {
+  height: 100%;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  color: #9691a2;
+
+  font-size: 14px;
+}
+
+
+/* ==========================================
+   BUSINESS HIGHLIGHTS
+========================================== */
+
+.business-highlights {
+  padding: 22px 24px;
+
+  background: #ffffff;
+
+  border: 1px solid #ebe9f1;
+  border-radius: 15px;
+
+  box-shadow:
+    0 4px 16px rgba(31, 26, 56, 0.05);
+}
+
+.highlights-header {
+  margin-bottom: 18px;
+}
+
+.highlights-header h3 {
+  margin: 0 0 3px;
+
+  color: #171725;
+
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.highlights-header p {
+  margin: 0;
+
+  color: #9691a2;
+
+  font-size: 12px;
+}
+
+.highlight-grid {
+  display: grid;
+
+  grid-template-columns: repeat(3, 1fr);
+
+  gap: 0;
+}
+
+.highlight-item {
+  display: flex;
+  align-items: center;
+
+  gap: 13px;
+
+  padding: 10px 24px;
+}
+
+.highlight-item:not(:last-child) {
+  border-right: 1px solid #ebe8f0;
+}
+
+.highlight-icon {
+  width: 42px;
+  height: 42px;
+
+  flex-shrink: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: #f0ebff;
+  color: #7657e8;
+
+  border-radius: 11px;
+}
+
+.highlight-item span {
+  display: block;
+
+  margin-bottom: 3px;
+
+  color: #918c9b;
+
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.highlight-item h4 {
+  margin: 0 0 3px;
+
+  color: #171725;
+
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.highlight-item p {
+  margin: 0;
+
+  color: #85808f;
+
+  font-size: 12px;
+}
+
+
+/* ==========================================
+   LOADING / ERROR
+========================================== */
+
+.revenue-state {
+  min-height: 400px;
+
+  display: flex;
+  flex-direction: column;
+
+  align-items: center;
+  justify-content: center;
+
+  text-align: center;
+}
+
+.revenue-state h3 {
+  margin-bottom: 7px;
+
+  color: #171725;
+}
+
+.revenue-state p {
+  color: #9691a2;
+}
+
+
+/* ==========================================
+   RESPONSIVE
+========================================== */
+
+@media (max-width: 1200px) {
+
+  .revenue-kpi-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .growth-panel {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .growth-metrics {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .growth-item {
+    min-width: 0;
+    flex: 1;
+  }
+
+}
+
+
+@media (max-width: 950px) {
+
+  .revenue-chart-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .highlight-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .highlight-item {
+    padding: 15px 5px;
+  }
+
+  .highlight-item:not(:last-child) {
+    border-right: none;
+    border-bottom: 1px solid #ebe8f0;
+  }
+
+}
+
+
+@media (max-width: 700px) {
+
+  .revenue-page {
+    padding: 22px 16px 35px;
+  }
+
+  .revenue-header h1 {
+    font-size: 26px;
+  }
+
+  .revenue-kpi-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .growth-metrics {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .growth-item {
+    padding: 12px 0;
+  }
+
+  .growth-divider {
+    width: 100%;
+    height: 1px;
+  }
+
+  .revenue-chart-area {
+    height: 260px;
+  }
+
+}

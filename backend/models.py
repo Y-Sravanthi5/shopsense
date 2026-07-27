@@ -83,24 +83,38 @@ class Product(Base):
 # -----------------------------
 # Transaction Table
 # -----------------------------
+# -----------------------------
+# Transaction Table
+# -----------------------------
 class Transaction(Base):
     __tablename__ = "transactions"
 
     id = Column(Integer, primary_key=True, index=True)
 
-    vendor_id = Column(Integer, ForeignKey("vendors.id"))
-    product_id = Column(Integer, ForeignKey("products.id"))
+    vendor_id = Column(
+        Integer,
+        ForeignKey("vendors.id"),
+        index=True
+    )
+
+    product_id = Column(
+        Integer,
+        ForeignKey("products.id"),
+        index=True
+    )
 
     quantity = Column(Integer, nullable=False)
     unit_price = Column(Float, nullable=False)
     total_amount = Column(Float, nullable=False)
 
-    transaction_date = Column(DateTime, default=datetime.utcnow)
+    transaction_date = Column(
+        DateTime,
+        default=datetime.utcnow,
+        index=True
+    )
 
     vendor = relationship("Vendor", back_populates="transactions")
     product = relationship("Product", back_populates="transactions")
-
-
 # -----------------------------
 # Cart Table
 # -----------------------------

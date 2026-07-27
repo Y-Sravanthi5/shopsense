@@ -1,461 +1,601 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
 import axios from "axios";
+import { Link } from "react-router-dom";
+
 import CustomerNavbar from "./components/CustomerNavbar";
 
+import {
+  ShoppingCart,
+  Trash2,
+  Minus,
+  Plus,
+  ArrowRight,
+  ShoppingBag,
+  PackageCheck,
+  ShieldCheck,
+  Tag,
+} from "lucide-react";
+
+import "../../styles/cart.css";
+
 function Cart() {
+  const [cart, setCart] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-    const customerId = localStorage.getItem("customer_id");
+  const customerId = localStorage.getItem("customer_id");
 
-    const [cartItems, setCartItems] = useState([]);
-    const [loading, setLoading] = useState(true);
+  /* =========================
+     LOAD CART
+  ========================= */
 
-    const DELIVERY_CHARGE = 50;
+  useEffect(() => {
+    fetchCart();
+  }, []);
 
-   useEffect(() => {
-
+  const fetchCart = async () => {
     if (!customerId) {
-        alert("Please login first");
-        return;
+      setLoading(false);
+      return;
     }
 
-    loadCart();
+    try {
+      setLoading(true);
 
-}, []);
+      const res = await axios.get(
+        `http://127.0.0.1:8000/cart/${customerId}`
+      );
 
-    const loadCart = () => {
+      setCart(res.data);
+    } catch (err) {
+      console.error("Cart Error:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-        setLoading(true);
+  /* =========================
+     INCREASE QUANTITY
+  ========================= */
 
-        axios
-            .get(`http://127.0.0.1:8000/cart/${customerId}`)
-            .then((res) => {
+  const increaseQuantity = async (item) => {
+    const currentQuantity = Number(item.quantity);
+    const stock = Number(item.stock);
 
-                setCartItems(res.data);
+    if (currentQuantity >= stock) {
+      alert("Maximum available stock reached.");
+      return;
+    }
 
-                setLoading(false);
-
-            })
-            .catch((err) => {
-
-                console.log(err);
-
-                setLoading(false);
-
-            });
-
-    };
-
-    const increaseQty = (item) => {
-
-        if (item.quantity >= item.stock) {
-            alert("Maximum stock reached");
-            return;
+    try {
+      await axios.put(
+        `http://127.0.0.1:8000/cart/${item.cart_id}`,
+        {
+          quantity: currentQuantity + 1,
         }
+      );
 
-        axios.put(`http://127.0.0.1:8000/cart/${item.id}`, {
+      fetchCart();
+    } catch (err) {
+      console.error("Increase Quantity Error:", err);
 
-            quantity: item.quantity + 1
+      alert(
+        err.response?.data?.detail ||
+          "Unable to update quantity."
+      );
+    }
+  };
 
-        })
+  /* =========================
+     DECREASE QUANTITY
+  ========================= */
 
-        .then(() => loadCart())
+  const decreaseQuantity = async (item) => {
+    const currentQuantity = Number(item.quantity);
 
-        .catch((err) => console.log(err));
+    if (currentQuantity <= 1) {
+      return;
+    }
 
-    };
-
-    const decreaseQty = (item) => {
-
-        if (item.quantity <= 1) {
-
-            removeItem(item.id);
-
-            return;
-
+    try {
+      await axios.put(
+        `http://127.0.0.1:8000/cart/${item.cart_id}`,
+        {
+          quantity: currentQuantity - 1,
         }
+      );
 
-        axios.put(`http://127.0.0.1:8000/cart/${item.id}`, {
+      fetchCart();
+    } catch (err) {
+      console.error("Decrease Quantity Error:", err);
 
-            quantity: item.quantity - 1
+      alert(
+        err.response?.data?.detail ||
+          "Unable to update quantity."
+      );
+    }
+  };
 
-        })
+  /* =========================
+     REMOVE ITEM
+  ========================= */
 
-        .then(() => loadCart())
+  const removeItem = async (cartId) => {
+    const confirmRemove = window.confirm(
+      "Remove this product from your cart?"
+    );
 
-        .catch((err) => console.log(err));
-
-    };
-
-    const removeItem = (id) => {
-
-        if (!window.confirm("Remove this product?"))
-            return;
-
-        axios
-            .delete(`http://127.0.0.1:8000/cart/${id}`)
-
-            .then(() => loadCart())
-
-            .catch((err) => console.log(err));
-
-    };
-
-    const subtotal = cartItems.reduce((sum, item) => {
-
-        return sum + item.price * item.quantity;
-
-    }, 0);
-
-    const discount = subtotal > 5000 ? subtotal * 0.10 : 0;
-
-    const delivery = cartItems.length === 0 ? 0 : DELIVERY_CHARGE;
-
-    const grandTotal = subtotal - discount + delivery;
-
-    if (loading) {
-
-        return (
-
-            <>
-                <CustomerNavbar />
-
-                <div className="container mt-5 text-center">
-
-                    <div
-                        className="spinner-border text-primary"
-                    ></div>
-
-                    <h5 className="mt-3">
-                        Loading Cart...
-                    </h5>
-
-                </div>
-
-            </>
-
-        );
-
+    if (!confirmRemove) {
+      return;
     }
 
-    if (cartItems.length === 0) {
+    try {
+      await axios.delete(
+        `http://127.0.0.1:8000/cart/${cartId}`
+      );
 
-        return (
+      setCart((currentCart) =>
+        currentCart.filter(
+          (item) => item.cart_id !== cartId
+        )
+      );
+    } catch (err) {
+      console.error("Remove Cart Error:", err);
 
-            <>
-                <CustomerNavbar />
-
-                <div className="container text-center mt-5">
-
-                    <img
-                        src="https://cdn-icons-png.flaticon.com/512/2038/2038854.png"
-                        alt=""
-                        width="170"
-                    />
-
-                    <h2 className="mt-4">
-                        Your Cart is Empty
-                    </h2>
-
-                    <p className="text-muted">
-
-                        Looks like you haven't added anything yet.
-
-                    </p>
-
-                    <Link
-                        to="/customer/products"
-                        className="btn btn-primary"
-                    >
-
-                        Continue Shopping
-
-                    </Link>
-
-                </div>
-
-            </>
-
-        );
-
+      alert(
+        err.response?.data?.detail ||
+          "Unable to remove product."
+      );
     }
+  };
+
+  /* =========================
+     PRICE CALCULATIONS
+  ========================= */
+
+  const subtotal = cart.reduce((total, item) => {
+    const originalPrice = Number(
+      item.original_price || item.price || 0
+    );
 
     return (
+      total +
+      originalPrice * Number(item.quantity || 0)
+    );
+  }, 0);
 
-        <>
-            <CustomerNavbar />
+  const finalTotal = cart.reduce((total, item) => {
+    return (
+      total +
+      Number(item.price || 0) *
+        Number(item.quantity || 0)
+    );
+  }, 0);
 
-            <div className="container mt-4">
+  const discount = Math.max(
+    0,
+    subtotal - finalTotal
+  );
 
-                <h2 className="fw-bold mb-4">
+  const totalItems = cart.reduce(
+    (total, item) =>
+      total + Number(item.quantity || 0),
+    0
+  );
 
-                    Shopping Cart
+  const formatPrice = (price) =>
+    Number(price || 0).toLocaleString("en-IN", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
 
-                </h2>
+  return (
+    <div className="cart-page">
 
-                <div className="row">
+      <CustomerNavbar />
 
-                    <div className="col-lg-8">
+      {/* =========================
+          PAGE HEADER
+      ========================= */}
 
-                        {
-                            cartItems.map((item) => (
+      <section className="cart-header">
 
-                                <div
-                                    className="card mb-3 shadow-sm"
-                                    key={item.id}
-                                >
+        <div className="cart-header-inner">
 
-                                    <div className="row g-0">
+          <div className="cart-header-icon">
+            <ShoppingCart size={24} />
+          </div>
 
-                                        <div className="col-md-3">
+          <div>
+            <span>YOUR SHOPPING</span>
 
-                                            <img
-                                                src={`http://127.0.0.1:8000/uploads/${item.image}`}
-                                                alt={item.product_name}
-                                                className="img-fluid rounded-start"
-                                                style={{
-                                                    height: "180px",
-                                                    objectFit: "cover"
-                                                }}
-                                            />
+            <h1>My Cart</h1>
 
-                                        </div>
+            <p>
+              Review your products before checkout.
+            </p>
+          </div>
 
-                                        <div className="col-md-9">
+        </div>
 
-                                            <div className="card-body">
+      </section>
 
-                                                <h5>
+      {/* =========================
+          MAIN
+      ========================= */}
 
-                                                    {item.product_name}
+      <main className="cart-main">
 
-                                                </h5>
+        {loading ? (
 
-                                                <h4 className="text-success">
+          /* LOADING */
 
-                                                    ₹{item.price}
+          <div className="cart-loading">
 
-                                                </h4>
+            <div className="cart-loader" />
 
-                                                <p>
+            <h3>Loading your cart...</h3>
 
-                                                    Stock Available :
+            <p>
+              Getting your products ready.
+            </p>
 
-                                                    <strong>
+          </div>
 
-                                                        {" "}
+        ) : cart.length === 0 ? (
 
-                                                        {item.stock}
+          /* EMPTY CART */
 
-                                                    </strong>
+          <div className="cart-empty">
 
-                                                </p>
+            <div className="cart-empty-icon">
+              <ShoppingCart size={38} />
+            </div>
 
-                                                <div className="d-flex align-items-center mb-3">
+            <h2>Your cart is empty</h2>
 
-                                                    <button
-                                                        className="btn btn-outline-secondary"
-                                                        onClick={() => decreaseQty(item)}
-                                                    >
+            <p>
+              Looks like you haven't added anything to
+              your cart yet. Explore the marketplace and
+              discover products you like.
+            </p>
 
-                                                        -
-
-                                                    </button>
-
-                                                    <span
-                                                        className="mx-3 fs-5"
-                                                    >
-
-                                                        {item.quantity}
-
-                                                    </span>
-
-                                                    <button
-                                                        className="btn btn-outline-secondary"
-                                                        onClick={() => increaseQty(item)}
-                                                    >
-
-                                                        +
-
-                                                    </button>
-
-                                                </div>
-
-                                                <h5>
-
-                                                    Subtotal :
-
-                                                    ₹{item.price * item.quantity}
-
-                                                </h5>
-
-                                                <button
-                                                    className="btn btn-danger mt-2"
-                                                    onClick={() => removeItem(item.id)}
-                                                >
-
-                                                    Remove
-
-                                                </button>
-
-                                            </div>
-
-                                        </div>
-
-                                    </div>
-
-                                </div>
-
-                            ))
-                        }
-
-                    </div>
-                                        {/* Order Summary */}
-
-                    <div className="col-lg-4">
-
-                        <div className="card shadow">
-
-                            <div className="card-header bg-primary text-white">
-
-                                <h4 className="mb-0">
-                                    Order Summary
-                                </h4>
-
-                            </div>
-
-                            <div className="card-body">
-
-                                <div className="d-flex justify-content-between mb-3">
-
-                                    <span>
-                                        Items
-                                    </span>
-
-                                    <strong>
-                                        {cartItems.length}
-                                    </strong>
-
-                                </div>
-
-                                <div className="d-flex justify-content-between mb-3">
-
-                                    <span>
-                                        Subtotal
-                                    </span>
-
-                                    <strong>
-                                        ₹{subtotal.toFixed(2)}
-                                    </strong>
-
-                                </div>
-
-                                <div className="d-flex justify-content-between mb-3">
-
-                                    <span>
-                                        Discount
-                                    </span>
-
-                                    <span className="text-success">
-
-                                        - ₹{discount.toFixed(2)}
-
-                                    </span>
-
-                                </div>
-
-                                <div className="d-flex justify-content-between mb-3">
-
-                                    <span>
-                                        Delivery Charges
-                                    </span>
-
-                                    <strong>
-                                        ₹{delivery.toFixed(2)}
-                                    </strong>
-
-                                </div>
-
-                                <hr />
-
-                                <div className="d-flex justify-content-between">
-
-                                    <h4>Total</h4>
-
-                                    <h4 className="text-success">
-
-                                        ₹{grandTotal.toFixed(2)}
-
-                                    </h4>
-
-                                </div>
-
-                                <hr />
-
-                                <Link
-                                    to="/customer/checkout"
-                                    className="btn btn-success w-100 btn-lg mb-2"
-                                >
-
-                                    Proceed to Checkout
-
-                                </Link>
-
-                                <Link
-                                    to="/customer/products"
-                                    className="btn btn-outline-primary w-100"
-                                >
-
-                                    Continue Shopping
-
-                                </Link>
-
-                            </div>
-
-                        </div>
-
-                        <div className="card mt-4 shadow-sm">
-
-                            <div className="card-body">
-
-                                <h5 className="mb-3">
-                                    Why Shop With Us?
-                                </h5>
-
-                                <ul className="list-unstyled">
-
-                                    <li className="mb-2">
-                                        🚚 Fast Delivery
-                                    </li>
-
-                                    <li className="mb-2">
-                                        🔒 Secure Payments
-                                    </li>
-
-                                    <li className="mb-2">
-                                        🔄 Easy Returns
-                                    </li>
-
-                                    <li className="mb-2">
-                                        💯 Genuine Products
-                                    </li>
-
-                                </ul>
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                </div>
+            <Link
+              to="/customer/products"
+              className="cart-shop-button"
+            >
+              <ShoppingBag size={17} />
+              Start Shopping
+              <ArrowRight size={16} />
+            </Link>
+
+          </div>
+
+        ) : (
+
+          <>
+            {/* =========================
+                CART TOP BAR
+            ========================= */}
+
+            <div className="cart-topbar">
+
+              <div>
+                <h2>Shopping Cart</h2>
+
+                <p>
+                  {totalItems}{" "}
+                  {totalItems === 1
+                    ? "item"
+                    : "items"}{" "}
+                  in your cart
+                </p>
+              </div>
+
+              <Link
+                to="/customer/products"
+                className="cart-continue-shopping"
+              >
+                Continue Shopping
+                <ArrowRight size={15} />
+              </Link>
 
             </div>
 
-        </>
+            {/* =========================
+                CART LAYOUT
+            ========================= */}
 
-    );
+            <div className="cart-layout">
 
+              {/* =========================
+                  CART ITEMS
+              ========================= */}
+
+              <section className="cart-items-section">
+
+                {cart.map((item) => {
+
+                  const quantity = Number(
+                    item.quantity || 0
+                  );
+
+                  const stock = Number(
+                    item.stock || 0
+                  );
+
+                  const price = Number(
+                    item.price || 0
+                  );
+
+                  const originalPrice = Number(
+                    item.original_price ||
+                      item.price ||
+                      0
+                  );
+
+                  const itemTotal =
+                    price * quantity;
+
+                  return (
+                    <article
+                      className="cart-item"
+                      key={item.cart_id}
+                    >
+
+                      {/* IMAGE */}
+
+                      <Link
+                        to={`/customer/product/${item.product_id}`}
+                        className="cart-item-image-wrapper"
+                      >
+                        <img
+                          src={`http://127.0.0.1:8000/uploads/${item.image}`}
+                          alt={item.product_name}
+                          className="cart-item-image"
+                          onError={(e) => {
+                            e.currentTarget.src =
+                              "https://placehold.co/400x400?text=No+Image";
+                          }}
+                        />
+                      </Link>
+
+                      {/* PRODUCT INFO */}
+
+                      <div className="cart-item-info">
+
+                        <span className="cart-item-category">
+                          {item.category}
+                        </span>
+
+                        <Link
+                          to={`/customer/product/${item.product_id}`}
+                          className="cart-item-name"
+                        >
+                          {item.product_name}
+                        </Link>
+
+                        <div className="cart-item-prices">
+
+                          <strong>
+                            ₹{formatPrice(price)}
+                          </strong>
+
+                          {originalPrice > price && (
+                            <span>
+                              ₹
+                              {formatPrice(
+                                originalPrice
+                              )}
+                            </span>
+                          )}
+
+                        </div>
+
+                        {stock > 0 && (
+                          <div className="cart-item-stock">
+                            <PackageCheck size={14} />
+
+                            {stock} available
+                          </div>
+                        )}
+
+                      </div>
+
+                      {/* QUANTITY */}
+
+                      <div className="cart-item-quantity">
+
+                        <span>Quantity</span>
+
+                        <div className="cart-quantity-control">
+
+                          <button
+                            type="button"
+                            onClick={() =>
+                              decreaseQuantity(item)
+                            }
+                            disabled={quantity <= 1}
+                          >
+                            <Minus size={15} />
+                          </button>
+
+                          <strong>
+                            {quantity}
+                          </strong>
+
+                          <button
+                            type="button"
+                            onClick={() =>
+                              increaseQuantity(item)
+                            }
+                            disabled={
+                              quantity >= stock
+                            }
+                          >
+                            <Plus size={15} />
+                          </button>
+
+                        </div>
+
+                      </div>
+
+                      {/* TOTAL */}
+
+                      <div className="cart-item-total">
+
+                        <span>Item Total</span>
+
+                        <strong>
+                          ₹{formatPrice(itemTotal)}
+                        </strong>
+
+                      </div>
+
+                      {/* REMOVE */}
+
+                      <button
+                        type="button"
+                        className="cart-remove-button"
+                        onClick={() =>
+                          removeItem(item.cart_id)
+                        }
+                        title="Remove product"
+                      >
+                        <Trash2 size={18} />
+                      </button>
+
+                    </article>
+                  );
+                })}
+
+              </section>
+
+              {/* =========================
+                  ORDER SUMMARY
+              ========================= */}
+
+              <aside className="cart-summary">
+
+                <div className="cart-summary-title">
+
+                  <div className="cart-summary-icon">
+                    <ShoppingBag size={19} />
+                  </div>
+
+                  <div>
+                    <h3>Order Summary</h3>
+
+                    <p>
+                      {totalItems}{" "}
+                      {totalItems === 1
+                        ? "item"
+                        : "items"}
+                    </p>
+                  </div>
+
+                </div>
+
+                <div className="cart-summary-divider" />
+
+                <div className="cart-summary-row">
+                  <span>Subtotal</span>
+
+                  <strong>
+                    ₹{formatPrice(subtotal)}
+                  </strong>
+                </div>
+
+                {discount > 0 && (
+                  <div className="cart-summary-row discount">
+
+                    <span>
+                      <Tag size={14} />
+                      Product Discount
+                    </span>
+
+                    <strong>
+                      − ₹{formatPrice(discount)}
+                    </strong>
+
+                  </div>
+                )}
+
+                <div className="cart-summary-row">
+                  <span>Delivery</span>
+
+                  <strong className="cart-free">
+                    FREE
+                  </strong>
+                </div>
+
+                <div className="cart-summary-divider" />
+
+                <div className="cart-summary-total">
+
+                  <div>
+                    <span>Total</span>
+
+                    <small>
+                      Final payable amount
+                    </small>
+                  </div>
+
+                  <strong>
+                    ₹{formatPrice(finalTotal)}
+                  </strong>
+
+                </div>
+
+                {/* CHECKOUT */}
+
+                <Link
+                  to="/customer/checkout"
+                  className="cart-checkout-button"
+                >
+                  Proceed to Checkout
+
+                  <ArrowRight size={17} />
+                </Link>
+
+                <div className="cart-secure">
+
+                  <ShieldCheck size={15} />
+
+                  <span>
+                    Secure ShopSense checkout
+                  </span>
+
+                </div>
+
+                {/* SAVINGS */}
+
+                {discount > 0 && (
+                  <div className="cart-savings">
+
+                    <Tag size={16} />
+
+                    <span>
+                      You're saving{" "}
+                      <strong>
+                        ₹{formatPrice(discount)}
+                      </strong>{" "}
+                      on this order.
+                    </span>
+
+                  </div>
+                )}
+
+              </aside>
+
+            </div>
+          </>
+
+        )}
+
+      </main>
+
+    </div>
+  );
 }
 
 export default Cart;

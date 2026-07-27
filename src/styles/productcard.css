@@ -1,0 +1,401 @@
+/* ==============================================
+   PRODUCT CARD
+============================================== */
+
+.shop-product-card {
+  width: 100%;
+  height: 100%;
+
+  display: flex;
+  flex-direction: column;
+
+  overflow: hidden;
+
+  background: #ffffff;
+
+  border: 1px solid #ebe9f1;
+  border-radius: 15px;
+
+  box-shadow:
+    0 5px 18px rgba(36, 29, 58, 0.05);
+
+  transition:
+    transform 0.22s ease,
+    box-shadow 0.22s ease,
+    border-color 0.22s ease;
+}
+
+.shop-product-card:hover {
+  transform: translateY(-4px);
+
+  border-color: #d9d1f3;
+
+  box-shadow:
+    0 14px 30px rgba(53, 42, 92, 0.1);
+}
+
+
+/* ==============================================
+   IMAGE
+============================================== */
+
+.shop-product-image-wrapper {
+  position: relative;
+
+  width: 100%;
+  height: 225px;
+
+  overflow: hidden;
+
+  background: #f6f5f8;
+}
+
+.shop-product-image {
+  width: 100%;
+  height: 100%;
+
+  display: block;
+
+  object-fit: cover;
+
+  transition: transform 0.35s ease;
+}
+
+.shop-product-card:hover .shop-product-image {
+  transform: scale(1.035);
+}
+
+
+/* ==============================================
+   CATEGORY
+============================================== */
+
+.shop-product-category {
+  position: absolute;
+
+  top: 13px;
+  left: 13px;
+
+  max-width: 130px;
+
+  padding: 5px 9px;
+
+  overflow: hidden;
+
+  color: #5f46bd;
+  background: rgba(255, 255, 255, 0.94);
+
+  border: 1px solid rgba(220, 214, 240, 0.9);
+  border-radius: 20px;
+
+  font-size: 11px;
+  font-weight: 700;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  box-shadow:
+    0 4px 10px rgba(30, 25, 45, 0.06);
+}
+
+
+/* ==============================================
+   WISHLIST
+============================================== */
+
+.shop-product-heart {
+  position: absolute;
+
+  top: 12px;
+  right: 12px;
+
+  width: 35px;
+  height: 35px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 0;
+
+  color: #6f6978;
+  background: rgba(255, 255, 255, 0.95);
+
+  border: 1px solid #e8e4ed;
+  border-radius: 50%;
+
+  cursor: pointer;
+
+  box-shadow:
+    0 4px 12px rgba(28, 23, 43, 0.08);
+
+  transition:
+    color 0.2s,
+    background 0.2s,
+    transform 0.2s;
+}
+
+.shop-product-heart:hover:not(:disabled) {
+  color: #e24f68;
+  background: #fff3f5;
+
+  transform: scale(1.06);
+}
+
+.shop-product-heart:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+
+/* ==============================================
+   DISCOUNT
+============================================== */
+
+.shop-product-discount {
+  position: absolute;
+
+  left: 13px;
+  bottom: 12px;
+
+  display: inline-flex;
+  align-items: center;
+
+  gap: 4px;
+
+  padding: 5px 8px;
+
+  color: #b33b50;
+  background: rgba(255, 240, 243, 0.96);
+
+  border: 1px solid #f2d3da;
+  border-radius: 6px;
+
+  font-size: 10px;
+  font-weight: 800;
+}
+
+
+/* ==============================================
+   CONTENT
+============================================== */
+
+.shop-product-content {
+  flex: 1;
+
+  display: flex;
+  flex-direction: column;
+
+  padding: 17px 17px 12px;
+}
+
+.shop-product-name {
+  margin: 0;
+
+  overflow: hidden;
+
+  color: #302c38;
+
+  font-size: 16px;
+  line-height: 1.35;
+  font-weight: 750;
+
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.shop-product-description {
+  min-height: 38px;
+
+  margin: 7px 0 13px;
+
+  overflow: hidden;
+
+  color: #8d8995;
+
+  font-size: 12px;
+  line-height: 1.55;
+
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+
+/* ==============================================
+   PRICE
+============================================== */
+
+.shop-product-price-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+
+  gap: 8px;
+
+  margin-top: auto;
+}
+
+.shop-product-price {
+  color: #5f46bd;
+
+  font-size: 20px;
+  line-height: 1;
+  font-weight: 800;
+}
+
+.shop-product-original-price {
+  color: #aaa5af;
+
+  font-size: 12px;
+
+  text-decoration: line-through;
+}
+
+
+/* ==============================================
+   STOCK
+============================================== */
+
+.shop-product-stock {
+  display: flex;
+  align-items: center;
+
+  gap: 5px;
+
+  margin-top: 11px;
+
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.shop-product-stock small {
+  font-size: 10px;
+  font-weight: 500;
+}
+
+.shop-in-stock {
+  color: #258459;
+}
+
+.shop-out-stock {
+  color: #d24c5f;
+}
+
+
+/* ==============================================
+   ACTIONS
+============================================== */
+
+.shop-product-actions {
+  display: grid;
+
+  grid-template-columns: 1fr 43px;
+
+  gap: 8px;
+
+  padding: 0 17px 17px;
+}
+
+.shop-add-cart {
+  min-height: 42px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 7px;
+
+  padding: 0 13px;
+
+  border: none;
+  border-radius: 8px;
+
+  color: #ffffff;
+  background: #7657e8;
+
+  font-size: 13px;
+  font-weight: 700;
+
+  cursor: pointer;
+
+  transition:
+    background 0.2s,
+    transform 0.2s;
+}
+
+.shop-add-cart:hover:not(:disabled) {
+  background: #6849d8;
+
+  transform: translateY(-1px);
+}
+
+.shop-add-cart:disabled {
+  color: #96919d;
+  background: #ebe9ef;
+
+  cursor: not-allowed;
+}
+
+
+/* VIEW DETAILS */
+
+.shop-view-product {
+  width: 43px;
+  height: 42px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  box-sizing: border-box;
+
+  color: #7657e8;
+  background: #f3efff;
+
+  border: 1px solid #dfd7f7;
+  border-radius: 8px;
+
+  text-decoration: none;
+
+  transition:
+    background 0.2s,
+    transform 0.2s;
+}
+
+.shop-view-product:hover {
+  color: #6547d3;
+  background: #e9e2ff;
+
+  transform: translateX(1px);
+}
+
+
+/* ==============================================
+   RESPONSIVE
+============================================== */
+
+@media (max-width: 600px) {
+
+  .shop-product-image-wrapper {
+    height: 260px;
+  }
+
+  .shop-product-name {
+    font-size: 17px;
+  }
+
+  .shop-product-description {
+    font-size: 13px;
+  }
+
+  .shop-product-price {
+    font-size: 21px;
+  }
+
+  .shop-add-cart {
+    font-size: 14px;
+  }
+
+}

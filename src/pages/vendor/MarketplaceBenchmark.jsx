@@ -10,8 +10,26 @@ import {
   LinearScale,
   BarElement,
   Tooltip,
-  Legend
+  Legend,
 } from "chart.js";
+
+import {
+  IndianRupee,
+  Trophy,
+  TrendingUp,
+  TrendingDown,
+  Minus,
+  PackageCheck,
+  ReceiptText,
+  Users,
+  Target,
+  BarChart3,
+  RefreshCw,
+  TriangleAlert,
+  Medal,
+} from "lucide-react";
+
+import "../../styles/marketplaceBenchmark.css";
 
 ChartJS.register(
   CategoryScale,
@@ -22,279 +40,683 @@ ChartJS.register(
 );
 
 function MarketplaceBenchmark() {
-
   const [data, setData] = useState(null);
-  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
+  const [loading, setLoading] =
+    useState(true);
 
-    const vendorId = localStorage.getItem("vendor_id");
+  const [error, setError] =
+    useState("");
+
+  /* =========================================================
+     LOAD MARKETPLACE BENCHMARK
+  ========================================================= */
+
+  const loadBenchmark = async () => {
+    const vendorId =
+      localStorage.getItem(
+        "vendor_id"
+      );
 
     if (!vendorId) {
+      setError(
+        "Vendor session not found. Please login again."
+      );
+
       setLoading(false);
+
       return;
     }
 
-    API.get(`/vendor/marketplace-benchmark/${vendorId}`)
-      .then((res) => {
-        console.log("Marketplace Benchmark:", res.data);
-        setData(res.data);
-      })
-      .catch((err) => {
-        console.error("Benchmark Error:", err);
-      })
-      .finally(() => {
-        setLoading(false);
-      });
+    try {
+      setLoading(true);
 
+      setError("");
+
+      const res =
+        await API.get(
+          `/vendor/marketplace-benchmark/${vendorId}`
+        );
+
+      if (res.data?.error) {
+        setError(
+          res.data.error
+        );
+
+        setData(null);
+
+        return;
+      }
+
+      setData(res.data);
+    } catch (err) {
+      console.error(
+        "Marketplace Benchmark Error:",
+        err
+      );
+
+      setError(
+        "Unable to load marketplace benchmark."
+      );
+
+      setData(null);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadBenchmark();
   }, []);
 
+  /* =========================================================
+     FORMATTERS
+  ========================================================= */
+
+  const money = (value) =>
+    Number(
+      value || 0
+    ).toLocaleString(
+      "en-IN",
+      {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      }
+    );
+
+  const number = (value) =>
+    Number(
+      value || 0
+    ).toLocaleString(
+      "en-IN"
+    );
+
+  const compactMoney = (
+    value
+  ) => {
+    const amount =
+      Number(value || 0);
+
+    if (
+      amount >=
+      10000000
+    ) {
+      return `₹${(
+        amount / 10000000
+      ).toFixed(1)}Cr`;
+    }
+
+    if (
+      amount >= 100000
+    ) {
+      return `₹${(
+        amount / 100000
+      ).toFixed(1)}L`;
+    }
+
+    if (
+      amount >= 1000
+    ) {
+      return `₹${(
+        amount / 1000
+      ).toFixed(1)}K`;
+    }
+
+    return `₹${amount}`;
+  };
+
+  /* =========================================================
+     LOADING
+  ========================================================= */
 
   if (loading) {
     return (
       <DashboardLayout>
-        <h4>Loading marketplace benchmark...</h4>
-      </DashboardLayout>
-    );
-  }
 
+        <div className="benchmark-state">
 
-  if (!data || data.error) {
-    return (
-      <DashboardLayout>
+          <RefreshCw
+            size={29}
+            className="benchmark-spin"
+          />
 
-        <div className="alert alert-danger">
-          {data?.error || "Unable to load marketplace benchmark."}
-        </div>
+          <h3>
+            Loading Marketplace
+            Benchmark...
+          </h3>
 
-      </DashboardLayout>
-    );
-  }
-
-
-  const performance =
-    Number(data.performance_percentage || 0);
-
-  const marketShare =
-    Number(data.market_share_percentage || 0);
-
-
-  const revenueComparison = {
-
-    labels: [
-      "Your Revenue",
-      "Marketplace Average"
-    ],
-
-    datasets: [
-      {
-        label: "Revenue (₹)",
-
-        data: [
-          data.vendor_revenue || 0,
-          data.marketplace_average_revenue || 0
-        ],
-
-        backgroundColor: [
-          "#5B3CC4",
-          "#A5A5A5"
-        ]
-      }
-    ]
-
-  };
-
-
-  const unitsComparison = {
-
-    labels: [
-      "Your Units",
-      "Marketplace Average"
-    ],
-
-    datasets: [
-      {
-        label: "Units Sold",
-
-        data: [
-          data.vendor_units_sold || 0,
-          data.marketplace_average_units || 0
-        ],
-
-        backgroundColor: [
-          "#198754",
-          "#A5A5A5"
-        ]
-      }
-    ]
-
-  };
-
-
-  return (
-
-    <DashboardLayout>
-
-      <div className="container-fluid">
-
-        <div className="mb-4">
-
-          <h2 className="fw-bold">
-            📊 Marketplace Benchmark
-          </h2>
-
-          <p className="text-muted">
-            Compare your business performance with
-            other approved vendors in ShopSense.
+          <p>
+            Comparing your
+            performance with the
+            marketplace.
           </p>
 
         </div>
 
+      </DashboardLayout>
+    );
+  }
 
-        {/* PERFORMANCE CARDS */}
+  /* =========================================================
+     ERROR
+  ========================================================= */
 
-        <div className="row g-4">
+  if (
+    error ||
+    !data
+  ) {
+    return (
+      <DashboardLayout>
 
-          <div className="col-lg-3 col-md-6">
+        <div className="benchmark-state">
 
-            <div className="card shadow border-0 h-100">
+          <TriangleAlert
+            size={31}
+          />
 
-              <div className="card-body">
+          <h3>
+            Marketplace Benchmark
+            Unavailable
+          </h3>
 
-                <p className="text-muted">
-                  Your Revenue
-                </p>
+          <p>
+            {error ||
+              "Unable to load marketplace benchmark."}
+          </p>
 
-                <h3 className="fw-bold">
-                  ₹{Number(
-                    data.vendor_revenue || 0
-                  ).toFixed(2)}
-                </h3>
-
-              </div>
-
-            </div>
-
-          </div>
-
-
-          <div className="col-lg-3 col-md-6">
-
-            <div className="card shadow border-0 h-100">
-
-              <div className="card-body">
-
-                <p className="text-muted">
-                  Marketplace Average
-                </p>
-
-                <h3 className="fw-bold">
-                  ₹{Number(
-                    data.marketplace_average_revenue || 0
-                  ).toFixed(2)}
-                </h3>
-
-              </div>
-
-            </div>
-
-          </div>
-
-
-          <div className="col-lg-3 col-md-6">
-
-            <div className="card shadow border-0 h-100">
-
-              <div className="card-body">
-
-                <p className="text-muted">
-                  Performance
-                </p>
-
-                <h3
-                  className={
-                    performance > 0
-                      ? "text-success fw-bold"
-                      : performance < 0
-                      ? "text-danger fw-bold"
-                      : "text-secondary fw-bold"
-                  }
-                >
-
-                  {performance > 0 ? "▲ " : ""}
-                  {performance < 0 ? "▼ " : ""}
-
-                  {performance.toFixed(2)}%
-
-                </h3>
-
-              </div>
-
-            </div>
-
-          </div>
-
-
-          <div className="col-lg-3 col-md-6">
-
-            <div className="card shadow border-0 h-100">
-
-              <div className="card-body">
-
-                <p className="text-muted">
-                  Revenue Rank
-                </p>
-
-                <h3 className="fw-bold">
-
-                  #{data.revenue_rank || "-"}
-
-                  <span className="fs-6 text-muted">
-                    {" "}of {data.total_vendors || 0}
-                  </span>
-
-                </h3>
-
-              </div>
-
-            </div>
-
-          </div>
+          <button
+            type="button"
+            onClick={
+              loadBenchmark
+            }
+            className="benchmark-retry"
+          >
+            Try Again
+          </button>
 
         </div>
 
+      </DashboardLayout>
+    );
+  }
 
-        {/* SECOND ROW */}
+  /* =========================================================
+     VALUES
+  ========================================================= */
 
-        <div className="row g-4 mt-1">
+  const performance =
+    Number(
+      data.performance_percentage ||
+        0
+    );
 
-          <div className="col-md-4">
+  const marketShare =
+    Number(
+      data.market_share_percentage ||
+        0
+    );
 
-            <div className="card shadow border-0 h-100">
+  const vendorRevenue =
+    Number(
+      data.vendor_revenue || 0
+    );
 
-              <div className="card-body">
+  const averageRevenue =
+    Number(
+      data.marketplace_average_revenue ||
+        0
+    );
 
-                <h6 className="text-muted">
-                  Market Share
-                </h6>
+  const vendorUnits =
+    Number(
+      data.vendor_units_sold ||
+        0
+    );
 
-                <h3 className="fw-bold">
-                  {marketShare.toFixed(2)}%
-                </h3>
+  const averageUnits =
+    Number(
+      data.marketplace_average_units ||
+        0
+    );
 
-                <div className="progress mt-3">
+  const vendorTransactions =
+    Number(
+      data.vendor_transactions ||
+        0
+    );
 
-                  <div
-                    className="progress-bar"
-                    style={{
-                      width:
-                        `${Math.min(marketShare, 100)}%`
-                    }}
-                  >
-                    {marketShare.toFixed(1)}%
-                  </div>
+  const averageTransactions =
+    Number(
+      data.marketplace_average_transactions ||
+        0
+    );
 
-                </div>
+  /* =========================================================
+     PERFORMANCE
+  ========================================================= */
+
+  const PerformanceIcon =
+    performance > 0
+      ? TrendingUp
+      : performance < 0
+      ? TrendingDown
+      : Minus;
+
+  const performanceClass =
+    performance > 0
+      ? "positive"
+      : performance < 0
+      ? "negative"
+      : "neutral";
+
+  /* =========================================================
+     REVENUE CHART
+  ========================================================= */
+
+  const revenueComparison = {
+    labels: [
+      "Your Revenue",
+      "Marketplace Avg.",
+    ],
+
+    datasets: [
+      {
+        data: [
+          vendorRevenue,
+          averageRevenue,
+        ],
+
+        backgroundColor: [
+          "#7657E8",
+          "#DDD8EB",
+        ],
+
+        borderRadius: 8,
+
+        borderSkipped: false,
+
+        maxBarThickness: 65,
+      },
+    ],
+  };
+
+  /* =========================================================
+     UNITS CHART
+  ========================================================= */
+
+  const unitsComparison = {
+    labels: [
+      "Your Units",
+      "Marketplace Avg.",
+    ],
+
+    datasets: [
+      {
+        data: [
+          vendorUnits,
+          averageUnits,
+        ],
+
+        backgroundColor: [
+          "#7657E8",
+          "#DDD8EB",
+        ],
+
+        borderRadius: 8,
+
+        borderSkipped: false,
+
+        maxBarThickness: 65,
+      },
+    ],
+  };
+
+  /* =========================================================
+     CHART OPTIONS
+  ========================================================= */
+
+  const revenueOptions = {
+    responsive: true,
+
+    maintainAspectRatio:
+      false,
+
+    plugins: {
+      legend: {
+        display: false,
+      },
+
+      tooltip: {
+        backgroundColor:
+          "#252333",
+
+        titleColor:
+          "#FFFFFF",
+
+        bodyColor:
+          "#FFFFFF",
+
+        padding: 11,
+
+        cornerRadius: 8,
+
+        displayColors: false,
+
+        callbacks: {
+          label: (
+            context
+          ) =>
+            `Revenue: ₹${money(
+              context.parsed.y
+            )}`,
+        },
+      },
+    },
+
+    scales: {
+      x: {
+        grid: {
+          display: false,
+        },
+
+        border: {
+          display: false,
+        },
+
+        ticks: {
+          color: "#777487",
+
+          font: {
+            size: 11,
+          },
+        },
+      },
+
+      y: {
+        beginAtZero: true,
+
+        border: {
+          display: false,
+        },
+
+        grid: {
+          color:
+            "rgba(118,87,232,0.08)",
+        },
+
+        ticks: {
+          color: "#8C8998",
+
+          font: {
+            size: 10,
+          },
+
+          callback: (
+            value
+          ) =>
+            compactMoney(
+              value
+            ),
+        },
+      },
+    },
+  };
+
+  const unitsOptions = {
+    responsive: true,
+
+    maintainAspectRatio:
+      false,
+
+    plugins: {
+      legend: {
+        display: false,
+      },
+
+      tooltip: {
+        backgroundColor:
+          "#252333",
+
+        titleColor:
+          "#FFFFFF",
+
+        bodyColor:
+          "#FFFFFF",
+
+        padding: 11,
+
+        cornerRadius: 8,
+
+        displayColors: false,
+
+        callbacks: {
+          label: (
+            context
+          ) =>
+            `Units: ${number(
+              context.parsed.y
+            )}`,
+        },
+      },
+    },
+
+    scales: {
+      x: {
+        grid: {
+          display: false,
+        },
+
+        border: {
+          display: false,
+        },
+
+        ticks: {
+          color: "#777487",
+
+          font: {
+            size: 11,
+          },
+        },
+      },
+
+      y: {
+        beginAtZero: true,
+
+        border: {
+          display: false,
+        },
+
+        grid: {
+          color:
+            "rgba(118,87,232,0.08)",
+        },
+
+        ticks: {
+          color: "#8C8998",
+
+          font: {
+            size: 10,
+          },
+
+          precision: 0,
+        },
+      },
+    },
+  };
+
+  return (
+    <DashboardLayout>
+
+      <div className="benchmark-page">
+
+        {/* =====================================================
+            HEADER
+        ===================================================== */}
+
+        <div className="benchmark-header">
+
+          <div>
+
+            <p className="benchmark-eyebrow">
+              MARKETPLACE INSIGHTS
+            </p>
+
+            <h1>
+              Marketplace Benchmark
+            </h1>
+
+            <p className="benchmark-subtitle">
+              Compare your business
+              performance with other
+              approved ShopSense
+              vendors.
+            </p>
+
+          </div>
+
+          <button
+            type="button"
+            className="benchmark-refresh"
+            onClick={
+              loadBenchmark
+            }
+          >
+
+            <RefreshCw
+              size={17}
+            />
+
+            Refresh
+
+          </button>
+
+        </div>
+
+        {/* =====================================================
+            KPI CARDS
+        ===================================================== */}
+
+        <div className="benchmark-kpi-grid">
+
+          {/* REVENUE */}
+
+          <div className="benchmark-kpi-card">
+
+            <div className="benchmark-kpi-icon violet">
+
+              <IndianRupee
+                size={21}
+              />
+
+            </div>
+
+            <div>
+
+              <span>
+                Your Revenue
+              </span>
+
+              <h2>
+                ₹
+                {money(
+                  vendorRevenue
+                )}
+              </h2>
+
+              <p>
+                Marketplace avg. ₹
+                {money(
+                  averageRevenue
+                )}
+              </p>
+
+            </div>
+
+          </div>
+
+          {/* PERFORMANCE */}
+
+          <div className="benchmark-kpi-card">
+
+            <div
+              className={`benchmark-kpi-icon ${performanceClass}`}
+            >
+
+              <PerformanceIcon
+                size={21}
+              />
+
+            </div>
+
+            <div>
+
+              <span>
+                Performance
+              </span>
+
+              <h2
+                className={`benchmark-performance ${performanceClass}`}
+              >
+
+                {performance >
+                0
+                  ? "+"
+                  : ""}
+
+                {performance.toFixed(
+                  2
+                )}
+                %
+
+              </h2>
+
+              <p>
+                Compared with
+                marketplace average
+              </p>
+
+            </div>
+
+          </div>
+
+          {/* MARKET SHARE */}
+
+          <div className="benchmark-kpi-card">
+
+            <div className="benchmark-kpi-icon blue">
+
+              <Target
+                size={21}
+              />
+
+            </div>
+
+            <div className="benchmark-share-content">
+
+              <span>
+                Market Share
+              </span>
+
+              <h2>
+                {marketShare.toFixed(
+                  2
+                )}
+                %
+              </h2>
+
+              <div className="benchmark-mini-progress">
+
+                <div
+                  style={{
+                    width: `${Math.min(
+                      Math.max(
+                        marketShare,
+                        0
+                      ),
+                      100
+                    )}%`,
+                  }}
+                />
 
               </div>
 
@@ -302,57 +724,243 @@ function MarketplaceBenchmark() {
 
           </div>
 
+          {/* RANK */}
 
-          <div className="col-md-4">
+          <div className="benchmark-kpi-card rank">
 
-            <div className="card shadow border-0 h-100">
+            <div className="benchmark-kpi-icon amber">
 
-              <div className="card-body">
+              <Trophy
+                size={21}
+              />
 
-                <h6 className="text-muted">
-                  Units Sold
-                </h6>
+            </div>
 
-                <h3>
-                  {data.vendor_units_sold || 0}
-                </h3>
+            <div>
 
-                <small className="text-muted">
-                  Marketplace average:{" "}
-                  {Number(
-                    data.marketplace_average_units || 0
-                  ).toFixed(2)}
+              <span>
+                Revenue Rank
+              </span>
+
+              <h2>
+
+                #
+                {data.revenue_rank ||
+                  "—"}
+
+                <small>
+                  {" "}
+                  of{" "}
+                  {data.total_vendors ||
+                    0}
                 </small>
 
-              </div>
+              </h2>
+
+              <p>
+                Marketplace position
+              </p>
 
             </div>
 
           </div>
 
+        </div>
 
-          <div className="col-md-4">
+        {/* =====================================================
+            COMPARISON STRIP
+        ===================================================== */}
 
-            <div className="card shadow border-0 h-100">
+        <div className="benchmark-comparison-strip">
 
-              <div className="card-body">
+          <div className="benchmark-strip-title">
 
-                <h6 className="text-muted">
-                  Transactions
-                </h6>
+            <div className="benchmark-strip-icon">
+
+              <BarChart3
+                size={20}
+              />
+
+            </div>
+
+            <div>
+
+              <h3>
+                Your Performance
+              </h3>
+
+              <p>
+                You vs marketplace
+                average
+              </p>
+
+            </div>
+
+          </div>
+
+          {/* UNITS */}
+
+          <div className="benchmark-strip-stat">
+
+            <span>
+              Units Sold
+            </span>
+
+            <strong>
+              {number(
+                vendorUnits
+              )}
+            </strong>
+
+            <small>
+              Avg.{" "}
+              {Number(
+                averageUnits
+              ).toFixed(2)}
+            </small>
+
+          </div>
+
+          <div className="benchmark-strip-divider" />
+
+          {/* TRANSACTIONS */}
+
+          <div className="benchmark-strip-stat">
+
+            <span>
+              Transactions
+            </span>
+
+            <strong>
+              {number(
+                vendorTransactions
+              )}
+            </strong>
+
+            <small>
+              Avg.{" "}
+              {Number(
+                averageTransactions
+              ).toFixed(2)}
+            </small>
+
+          </div>
+
+          <div className="benchmark-strip-divider" />
+
+          {/* VENDORS */}
+
+          <div className="benchmark-strip-stat">
+
+            <span>
+              Vendors
+            </span>
+
+            <strong>
+              {number(
+                data.total_vendors
+              )}
+            </strong>
+
+            <small>
+              Approved vendors
+            </small>
+
+          </div>
+
+        </div>
+
+        {/* =====================================================
+            CHARTS
+        ===================================================== */}
+
+        <div className="benchmark-chart-grid">
+
+          {/* REVENUE */}
+
+          <div className="benchmark-chart-card">
+
+            <div className="benchmark-chart-header">
+
+              <div>
 
                 <h3>
-                  {data.vendor_transactions || 0}
+                  Revenue Comparison
                 </h3>
 
-                <small className="text-muted">
-                  Marketplace average:{" "}
-                  {Number(
-                    data.marketplace_average_transactions || 0
-                  ).toFixed(2)}
-                </small>
+                <p>
+                  Your revenue compared
+                  with the marketplace
+                  average.
+                </p>
 
               </div>
+
+              <div className="benchmark-chart-icon">
+
+                <IndianRupee
+                  size={19}
+                />
+
+              </div>
+
+            </div>
+
+            <div className="benchmark-chart-area">
+
+              <Bar
+                data={
+                  revenueComparison
+                }
+                options={
+                  revenueOptions
+                }
+              />
+
+            </div>
+
+          </div>
+
+          {/* UNITS */}
+
+          <div className="benchmark-chart-card">
+
+            <div className="benchmark-chart-header">
+
+              <div>
+
+                <h3>
+                  Sales Volume
+                </h3>
+
+                <p>
+                  Compare units sold
+                  against the marketplace
+                  average.
+                </p>
+
+              </div>
+
+              <div className="benchmark-chart-icon">
+
+                <PackageCheck
+                  size={19}
+                />
+
+              </div>
+
+            </div>
+
+            <div className="benchmark-chart-area">
+
+              <Bar
+                data={
+                  unitsComparison
+                }
+                options={
+                  unitsOptions
+                }
+              />
 
             </div>
 
@@ -360,119 +968,237 @@ function MarketplaceBenchmark() {
 
         </div>
 
+        {/* =====================================================
+            LEADERBOARD
+        ===================================================== */}
 
-        {/* COMPARISON CHARTS */}
+        <div className="benchmark-leaderboard">
 
-        <div className="row g-4 mt-1">
+          <div className="benchmark-leaderboard-header">
 
-          <div className="col-lg-6">
+            <div>
 
-            <div className="card shadow border-0">
+              <h3>
+                Marketplace Leaderboard
+              </h3>
 
-              <div className="card-body">
+              <p>
+                Revenue ranking across
+                approved ShopSense
+                vendors.
+              </p>
 
-                <h5 className="mb-4">
-                  💰 Revenue Comparison
-                </h5>
+            </div>
 
-                <Bar data={revenueComparison} />
+            <div className="benchmark-leaderboard-badge">
 
-              </div>
+              <Users
+                size={15}
+              />
+
+              {data.total_vendors ||
+                0}{" "}
+              Vendors
 
             </div>
 
           </div>
 
+          <div className="benchmark-table-wrapper">
 
-          <div className="col-lg-6">
+            <table className="benchmark-table">
 
-            <div className="card shadow border-0">
+              <thead>
 
-              <div className="card-body">
+                <tr>
 
-                <h5 className="mb-4">
-                  📦 Sales Volume Comparison
-                </h5>
+                  <th>
+                    Rank
+                  </th>
 
-                <Bar data={unitsComparison} />
+                  <th>
+                    Vendor
+                  </th>
 
-              </div>
+                  <th>
+                    Revenue
+                  </th>
 
-            </div>
+                  <th>
+                    Units Sold
+                  </th>
 
-          </div>
+                  <th>
+                    Position
+                  </th>
 
-        </div>
+                </tr>
 
+              </thead>
 
-        {/* LEADERBOARD */}
+              <tbody>
 
-        <div className="card shadow border-0 mt-4 mb-5">
+                {(data.leaderboard ||
+                  []).length >
+                0 ? (
 
-          <div className="card-body">
+                  data.leaderboard.map(
+                    (
+                      vendor
+                    ) => {
 
-            <h4 className="mb-4">
-              🏆 Marketplace Leaderboard
-            </h4>
+                      const isYou =
+                        Number(
+                          vendor.vendor_id
+                        ) ===
+                        Number(
+                          data.vendor_id
+                        );
 
-            <div className="table-responsive">
+                      return (
 
-              <table className="table table-hover">
+                        <tr
+                          key={
+                            vendor.vendor_id
+                          }
+                          className={
+                            isYou
+                              ? "benchmark-you-row"
+                              : ""
+                          }
+                        >
 
-                <thead>
+                          <td>
+
+                            <div
+                              className={`benchmark-rank ${
+                                Number(
+                                  vendor.rank
+                                ) <=
+                                3
+                                  ? "top"
+                                  : ""
+                              }`}
+                            >
+
+                              {Number(
+                                vendor.rank
+                              ) <=
+                              3 && (
+
+                                <Medal
+                                  size={14}
+                                />
+
+                              )}
+
+                              #
+                              {
+                                vendor.rank
+                              }
+
+                            </div>
+
+                          </td>
+
+                          <td>
+
+                            <div className="benchmark-vendor-name">
+
+                              <strong>
+                                {
+                                  vendor.business_name
+                                }
+                              </strong>
+
+                              {isYou && (
+
+                                <span>
+                                  You
+                                </span>
+
+                              )}
+
+                            </div>
+
+                          </td>
+
+                          <td>
+
+                            <strong className="benchmark-revenue-value">
+
+                              ₹
+                              {money(
+                                vendor.revenue
+                              )}
+
+                            </strong>
+
+                          </td>
+
+                          <td>
+
+                            {number(
+                              vendor.units_sold
+                            )}
+
+                          </td>
+
+                          <td>
+
+                            {Number(
+                              vendor.rank
+                            ) ===
+                            1 ? (
+
+                              <span className="benchmark-position first">
+                                Leader
+                              </span>
+
+                            ) : Number(
+                                vendor.rank
+                              ) <=
+                              3 ? (
+
+                              <span className="benchmark-position top">
+                                Top 3
+                              </span>
+
+                            ) : (
+
+                              <span className="benchmark-position">
+                                Ranked
+                              </span>
+
+                            )}
+
+                          </td>
+
+                        </tr>
+
+                      );
+                    }
+                  )
+
+                ) : (
 
                   <tr>
-                    <th>Rank</th>
-                    <th>Vendor</th>
-                    <th>Revenue</th>
-                    <th>Units Sold</th>
+
+                    <td
+                      colSpan="5"
+                      className="benchmark-no-data"
+                    >
+                      No leaderboard
+                      data available.
+                    </td>
+
                   </tr>
 
-                </thead>
+                )}
 
-                <tbody>
+              </tbody>
 
-                  {(data.leaderboard || []).map(
-                    (vendor) => (
-
-                      <tr
-                        key={vendor.vendor_id}
-                        className={
-                          vendor.vendor_id ===
-                          Number(data.vendor_id)
-                            ? "table-success"
-                            : ""
-                        }
-                      >
-
-                        <td>
-                          #{vendor.rank}
-                        </td>
-
-                        <td>
-                          {vendor.business_name}
-                        </td>
-
-                        <td>
-                          ₹{Number(
-                            vendor.revenue || 0
-                          ).toFixed(2)}
-                        </td>
-
-                        <td>
-                          {vendor.units_sold}
-                        </td>
-
-                      </tr>
-
-                    )
-                  )}
-
-                </tbody>
-
-              </table>
-
-            </div>
+            </table>
 
           </div>
 
@@ -481,9 +1207,7 @@ function MarketplaceBenchmark() {
       </div>
 
     </DashboardLayout>
-
   );
-
 }
 
 export default MarketplaceBenchmark;
