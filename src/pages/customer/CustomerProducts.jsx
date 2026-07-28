@@ -108,22 +108,22 @@ function CustomerProducts() {
 
         </div>
 
-        <div className="row">
+        <div className="products-grid">
 
-          {filteredProducts.length > 0 ? (
-            filteredProducts.map((product) => (
-              <ProductCard
-                key={product.id}
-                product={product}
-              />
-            ))
-          ) : (
-            <h4 className="text-center">
-              No Products Found
-            </h4>
-          )}
+  {filteredProducts.length > 0 ? (
+    filteredProducts.map((product) => (
+      <ProductCard
+        key={product.id}
+        product={product}
+      />
+    ))
+  ) : (
+    <h4 className="text-center">
+      No Products Found
+    </h4>
+  )}
 
-        </div>
+</div>
 
       </div>
     </>

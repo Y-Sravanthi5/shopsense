@@ -1,0 +1,211 @@
+.customer-navbar{
+    position:sticky;
+    top:0;
+    z-index:1000;
+
+    background:linear-gradient(135deg,#6F42C1,#8B5CF6);
+
+    box-shadow:0 8px 20px rgba(111,66,193,.25);
+}
+
+.customer-nav-container{
+
+    max-width:1400px;
+
+    margin:auto;
+
+    padding:15px 35px;
+
+    display:flex;
+
+    align-items:center;
+
+    gap:60px;
+
+}
+
+.customer-logo{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:10px;
+
+    color:white;
+
+    text-decoration:none;
+
+    font-size:30px;
+
+    font-weight:800;
+
+    white-space:nowrap;
+
+}
+
+.customer-logo svg{
+
+    font-size:34px;
+
+}
+
+.customer-nav-links{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:14px;
+
+}
+
+.nav-btn{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:8px;
+
+    color:white;
+
+    text-decoration:none;
+
+    padding:11px 18px;
+
+    border-radius:12px;
+
+    font-size:15px;
+
+    font-weight:600;
+
+    transition:.3s;
+
+}
+
+.nav-btn svg{
+
+    font-size:18px;
+
+}
+
+.nav-btn:hover{
+
+    background:rgba(255,255,255,.18);
+
+    color:white;
+
+}
+
+.active{
+
+    background:white;
+
+    color:#6F42C1 !important;
+
+    box-shadow:0 6px 16px rgba(0,0,0,.15);
+
+}
+
+.logout-btn{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:8px;
+
+    text-decoration:none;
+
+    color:white;
+
+    background:#F59E0B;
+
+    padding:11px 20px;
+
+    border-radius:12px;
+
+    font-weight:700;
+
+    transition:.3s;
+
+}
+
+.logout-btn svg{
+
+    font-size:18px;
+
+}
+
+.logout-btn:hover{
+
+    background:#d97706;
+
+    color:white;
+
+    transform:translateY(-2px);
+
+}
+
+@media(max-width:1000px){
+
+    .customer-nav-container{
+
+        flex-direction:column;
+
+        gap:20px;
+
+    }
+
+    .customer-nav-links{
+
+        flex-wrap:wrap;
+
+        justify-content:center;
+
+    }
+
+}
+.customer-user{
+
+    display:flex;
+    align-items:center;
+
+    padding:10px 16px;
+
+    background:#f4f1ff;
+
+    border:1px solid #ddd4ff;
+
+    border-radius:12px;
+
+    color:#5f46bd;
+
+    font-size:14px;
+
+    font-weight:600;
+
+    white-space:nowrap;
+
+}
+
+.customer-user strong{
+
+    margin-left:6px;
+
+    color:#35295c;
+
+}
+
+.logout-btn{
+
+    display:flex;
+    align-items:center;
+    gap:8px;
+
+    border:none;
+    outline:none;
+
+    cursor:pointer;
+}

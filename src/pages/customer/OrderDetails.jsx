@@ -2,84 +2,104 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
 import CustomerNavbar from "./components/CustomerNavbar";
+import "../../styles/orderDetails.css";
 
 function OrderDetails() {
+  const { id } = useParams();
 
-    const { id } = useParams();
+  const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-    const [items, setItems] = useState([]);
+  useEffect(() => {
+    loadItems();
+  }, []);
 
-    useEffect(() => {
-        loadItems();
-    }, []);
+  const loadItems = () => {
+    axios
+      .get(`http://127.0.0.1:8000/order/${id}`)
+      .then((res) => {
+        setItems(res.data);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.log(err);
+        setLoading(false);
+      });
+  };
 
-    const loadItems = () => {
+  const grandTotal = items.reduce(
+    (sum, item) => sum + item.quantity * item.price,
+    0
+  );
 
-        axios
-            .get(`http://127.0.0.1:8000/order/${id}`)
-            .then((res) => {
-                setItems(res.data);
-            })
-            .catch((err) => console.log(err));
+  return (
+    <>
+      <CustomerNavbar />
 
-    };
+      <div className="order-details-page">
 
-    return (
+        <div className="order-header">
+          <div>
+            <h2>Order Details</h2>
+            <p>Order #{id}</p>
+          </div>
 
-        <>
-            <CustomerNavbar />
+          <span className="status delivered">
+            Delivered
+          </span>
+        </div>
 
-            <div className="container mt-4">
+        {loading ? (
+          <div className="loading-card">
+            Loading order details...
+          </div>
+        ) : items.length === 0 ? (
+          <div className="empty-card">
+            No items found.
+          </div>
+        ) : (
+          <>
+            {items.map((item) => (
+              <div className="order-item-card" key={item.id}>
+                <div className="product-icon">
+                  📦
+                </div>
 
-                <h2 className="mb-4">
-                    Order Details
-                </h2>
+                <div className="item-info">
+                  <h5>Product #{item.product_id}</h5>
 
-                <table className="table table-bordered table-hover">
+                  <p>
+                    Quantity :
+                    <strong> {item.quantity}</strong>
+                  </p>
 
-                    <thead className="table-dark">
+                  <p>
+                    Price :
+                    <strong> ₹{item.price}</strong>
+                  </p>
+                </div>
 
-                        <tr>
+                <div className="item-total">
+                  ₹{item.quantity * item.price}
+                </div>
+              </div>
+            ))}
 
-                            <th>Product ID</th>
-                            <th>Quantity</th>
-                            <th>Price</th>
-                            <th>Total</th>
+            <div className="summary-card">
+              <div>
+                <h4>Total Amount</h4>
+                <h2>₹{grandTotal}</h2>
+              </div>
 
-                        </tr>
-
-                    </thead>
-
-                    <tbody>
-
-                        {
-                            items.map((item) => (
-
-                                <tr key={item.id}>
-
-                                    <td>{item.product_id}</td>
-
-                                    <td>{item.quantity}</td>
-
-                                    <td>₹{item.price}</td>
-
-                                    <td>₹{item.quantity * item.price}</td>
-
-                                </tr>
-
-                            ))
-                        }
-
-                    </tbody>
-
-                </table>
-
+              <button className="buy-btn">
+                Buy Again
+              </button>
             </div>
-
-        </>
-
-    );
-
+          </>
+        )}
+      </div>
+    </>
+  );
 }
 
 export default OrderDetails;

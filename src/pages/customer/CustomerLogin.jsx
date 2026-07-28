@@ -18,34 +18,42 @@ function CustomerLogin() {
     });
   };
 
- const handleSubmit = async (e) => {
-  e.preventDefault();
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-  console.log("Customer Login button clicked");
-  alert("Button Clicked");
+    try {
 
-  try {
-    const res = await API.post("/customer/login", customer);
+      const res = await API.post("/customer/login", customer);
 
-    console.log(res.data);
+      console.log(res.data);
 
-    if (res.data.message === "Customer Login Successful") {
+      if (res.data.message === "Customer Login Successful") {
 
-      localStorage.setItem("customer_id", res.data.customer_id);
+        localStorage.setItem("customer_id", res.data.customer_id);
 
-      alert("Login Successful");
+        localStorage.setItem(
+          "customer_name",
+          res.data.full_name
+        );
 
-      navigate("/customer/dashboard");
+        alert("Login Successful");
 
-    } else {
-      alert(res.data.message);
+        navigate("/customer/dashboard");
+
+      } else {
+
+        alert(res.data.message);
+
+      }
+
+    } catch (err) {
+
+      console.error(err);
+
+      alert("Login Failed");
+
     }
-
-  } catch (err) {
-    console.error(err);
-    alert("Login Failed");
-  }
-};
+  };
 
   return (
 

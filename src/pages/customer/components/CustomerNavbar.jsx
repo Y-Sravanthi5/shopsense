@@ -1,58 +1,109 @@
-import { Link } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import {
+    FiShoppingBag,
+    FiHeart,
+    FiPackage,
+    FiShoppingCart,
+    FiLogOut
+} from "react-icons/fi";
+
+import "../../../styles/customerNavbar.css";
 
 function CustomerNavbar() {
-  return (
-    <nav className="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
-      <div className="container">
 
-        {/* Logo */}
-        <Link className="navbar-brand fw-bold fs-3" to="/customer/products">
-          ShopSense
-        </Link>
+    const location = useLocation();
+    const navigate = useNavigate();
 
-        {/* Navbar Buttons */}
-        <div className="ms-auto">
+    const customerName =
+        (localStorage.getItem("customer_name") || "Customer").split(" ")[0];
 
-          <Link
-            className="btn btn-outline-light me-2"
-            to="/customer/products"
-          >
-            Products
-          </Link>
+    const isActive = (path) => location.pathname.startsWith(path);
 
-          <Link
-            className="btn btn-outline-light me-2"
-            to="/customer/cart"
-          >
-            Cart
-          </Link>
+    const handleLogout = () => {
 
-          <Link
-            className="btn btn-outline-light me-2"
-            to="/customer/wishlist"
-          >
-            Wishlist
-          </Link>
+        localStorage.removeItem("customer_id");
+        localStorage.removeItem("customer_name");
 
-          <Link
-            className="btn btn-outline-light me-2"
-            to="/customer/orders"
-          >
-            Orders
-          </Link>
+        navigate("/");
 
-          <Link
-            className="btn btn-warning"
-            to="/"
-          >
-            Logout
-          </Link>
+    };
 
-        </div>
+    return (
 
-      </div>
-    </nav>
-  );
+        <nav className="customer-navbar">
+
+            <div className="customer-nav-container">
+
+                {/* Logo */}
+
+                <Link
+                    to="/customer/products"
+                    className="customer-logo"
+                >
+                    <FiShoppingBag />
+                    <span>ShopSense</span>
+                </Link>
+
+                {/* Navigation */}
+
+                <div className="customer-nav-links">
+
+                    <Link
+                        to="/customer/products"
+                        className={isActive("/customer/products") ? "nav-btn active" : "nav-btn"}
+                    >
+                        <FiShoppingBag />
+                        <span>Products</span>
+                    </Link>
+
+                    <Link
+                        to="/customer/wishlist"
+                        className={isActive("/customer/wishlist") ? "nav-btn active" : "nav-btn"}
+                    >
+                        <FiHeart />
+                        <span>Wishlist</span>
+                    </Link>
+
+                    <Link
+                        to="/customer/orders"
+                        className={isActive("/customer/orders") ? "nav-btn active" : "nav-btn"}
+                    >
+                        <FiPackage />
+                        <span>Orders</span>
+                    </Link>
+
+                    <Link
+                        to="/customer/cart"
+                        className={isActive("/customer/cart") ? "nav-btn active" : "nav-btn"}
+                    >
+                        <FiShoppingCart />
+                        <span>Cart</span>
+                    </Link>
+
+                    {/* Greeting */}
+
+                    <div className="customer-user">
+                        👋 Hi, <strong>{customerName}</strong>
+                    </div>
+
+                    {/* Logout */}
+
+                    <button
+                        className="logout-btn"
+                        onClick={handleLogout}
+                    >
+                        <FiLogOut />
+                        <span>Logout</span>
+                    </button>
+
+                </div>
+
+            </div>
+
+        </nav>
+
+    );
+
 }
 
 export default CustomerNavbar;

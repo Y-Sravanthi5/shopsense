@@ -1,16 +1,21 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import CustomerNavbar from "./components/CustomerNavbar";
+import ProductCard from "../../components/ProductCard";
+import "../../styles/productDetails.css";
 
 function ProductDetails() {
 
     const { id } = useParams();
 
-    const [product, setProduct] = useState(null);
-    const [recommendations, setRecommendations] = useState([]);
+    const navigate = useNavigate();
 
     const customerId = localStorage.getItem("customer_id");
+
+    const [product, setProduct] = useState(null);
+    const [recommendations, setRecommendations] = useState([]);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
 
@@ -24,9 +29,17 @@ function ProductDetails() {
         axios
             .get(`http://127.0.0.1:8000/products/${id}`)
             .then((res) => {
+
                 setProduct(res.data);
+                setLoading(false);
+
             })
-            .catch((err) => console.log(err));
+            .catch((err) => {
+
+                console.log(err);
+                setLoading(false);
+
+            });
 
     };
 
@@ -35,7 +48,9 @@ function ProductDetails() {
         axios
             .get(`http://127.0.0.1:8000/products/${id}/recommendations`)
             .then((res) => {
+
                 setRecommendations(res.data);
+
             })
             .catch((err) => console.log(err));
 
@@ -43,37 +58,91 @@ function ProductDetails() {
 
     const addToCart = () => {
 
-        axios.post("http://127.0.0.1:8000/cart/add", {
+        axios
+            .post("http://127.0.0.1:8000/cart/add", {
 
-            customer_id: customerId,
+                customer_id: customerId,
+                product_id: product.id,
+                quantity: 1
 
-            product_id: product.id,
+            })
 
-            quantity: 1
+            .then(() => {
 
-        })
+                alert("Added to Cart");
 
-        .then(() => alert("Added to Cart"))
+            })
 
-        .catch((err) => console.log(err));
+            .catch((err) => console.log(err));
 
     };
 
     const addWishlist = () => {
 
-        axios.post("http://127.0.0.1:8000/wishlist/add", {
+        axios
+            .post("http://127.0.0.1:8000/wishlist/add", {
 
-            customer_id: customerId,
+                customer_id: customerId,
+                product_id: product.id
 
-            product_id: product.id
+            })
 
-        })
+            .then(() => {
 
-        .then(() => alert("Added to Wishlist"))
+                alert("Added to Wishlist");
 
-        .catch((err) => console.log(err));
+            })
+
+            .catch((err) => console.log(err));
 
     };
+
+    const buyNow = async () => {
+
+        try {
+
+            await axios.post("http://127.0.0.1:8000/cart/add", {
+
+                customer_id: customerId,
+                product_id: product.id,
+                quantity: 1
+
+            });
+
+            navigate("/customer/checkout");
+
+        }
+
+        catch (err) {
+
+            console.log(err);
+
+        }
+
+    };
+
+    if (loading) {
+
+        return (
+
+            <>
+                <CustomerNavbar />
+
+                <div className="product-loading">
+
+                    <div className="loader-card">
+
+                        <h2>Loading Product...</h2>
+
+                    </div>
+
+                </div>
+
+            </>
+
+        );
+
+    }
 
     if (!product) {
 
@@ -82,9 +151,13 @@ function ProductDetails() {
             <>
                 <CustomerNavbar />
 
-                <div className="container mt-5">
+                <div className="product-loading">
 
-                    <h2>Loading...</h2>
+                    <div className="loader-card">
+
+                        <h2>Product Not Found</h2>
+
+                    </div>
 
                 </div>
 
@@ -95,95 +168,212 @@ function ProductDetails() {
     }
 
     return (
-
         <>
-
             <CustomerNavbar />
 
-            <div className="container mt-5">
+            <div className="product-details-page">
 
-                <div className="row">
+                <div className="product-container">
 
-                    <div className="col-md-5">
+                    <div className="image-section">
 
-                        <img
-                            src={`http://127.0.0.1:8000/uploads/${product.image}`}
-                            alt={product.product_name}
-                            className="img-fluid rounded shadow"
-                        />
+                        <div className="image-card">
 
-                    </div>
+                            <img
+                                src={`http://127.0.0.1:8000/uploads/${product.image}`}
+                                alt={product.product_name}
+                                className="product-image"
+                            />
 
-                    <div className="col-md-7">
+                            <div className="image-badge">
 
-                        <h2>{product.product_name}</h2>
+                                {product.discount}% OFF
 
-                        <span className="badge bg-secondary">
-                            {product.category}
-                        </span>
-
-                        <div className="mt-3">
-
-                            ⭐⭐⭐⭐☆
-                            <span className="ms-2">(4.5)</span>
+                            </div>
 
                         </div>
 
-                        <p className="mt-3">
+                    </div>
+
+                    <div className="details-section">
+
+                        <span className="category-badge">
+
+                            {product.category}
+
+                        </span>
+
+                        <h1 className="product-title">
+
+                            {product.product_name}
+
+                        </h1>
+
+                        <div className="rating-row">
+
+                            <span className="stars">
+
+                                ★★★★☆
+
+                            </span>
+
+                            <span className="rating-text">
+
+                                4.5 (2,143 Ratings)
+
+                            </span>
+
+                        </div>
+
+                        <p className="description">
 
                             {product.description}
 
                         </p>
 
-                        <h5>
+                        <div className="price-container">
 
-                            <span className="text-decoration-line-through text-secondary">
+                            <div className="current-price">
 
-                                ₹{product.original_price}
+                                ₹{product.price}
 
-                            </span>
+                            </div>
 
-                            <span className="badge bg-danger ms-3">
+                            <div className="price-info">
 
-                                {product.discount}% OFF
+                                <span className="old-price">
 
-                            </span>
+                                    ₹{product.original_price}
 
-                        </h5>
+                                </span>
 
-                        <h2 className="text-success">
+                                <span className="discount-text">
 
-                            ₹{product.price}
+                                    {product.discount}% OFF
 
-                        </h2>
+                                </span>
 
-                        <h5>
+                            </div>
 
-                            Stock : {product.stock}
+                        </div>
 
-                        </h5>
+                        <div className="stock-section">
 
-                        <div className="mt-4">
+                            {
 
-                            <button
-                                className="btn btn-success me-3"
-                                onClick={addToCart}
-                            >
-                                🛒 Add to Cart
-                            </button>
+                                product.stock > 0 ?
 
-                            <button
-                                className="btn btn-outline-danger me-3"
-                                onClick={addWishlist}
-                            >
-                                ❤ Wishlist
-                            </button>
+                                    <span className="stock available">
 
-                            <button
-                                className="btn btn-warning"
-                            >
-                                Buy Now
-                            </button>
+                                        ✔ In Stock ({product.stock} Available)
+
+                                    </span>
+
+                                    :
+
+                                    <span className="stock unavailable">
+
+                                        ✖ Out of Stock
+
+                                    </span>
+
+                            }
+
+                        </div>
+                                        <div className="button-group">
+
+                    <button
+                        className="cart-btn"
+                        onClick={addToCart}
+                    >
+                        🛒 Add to Cart
+                    </button>
+
+                    <button
+                        className="wishlist-btn"
+                        onClick={addWishlist}
+                    >
+                        ❤ Wishlist
+                    </button>
+
+                    <button
+                        className="buy-btn"
+                        onClick={buyNow}
+                    >
+                        Buy Now
+                    </button>
+
+                </div>
+
+                <div className="service-grid">
+
+                    <div className="service-card">
+
+                        <div className="service-icon">
+                            🚚
+                        </div>
+
+                        <div>
+
+                            <h5>Free Delivery</h5>
+
+                            <p>
+                                On eligible orders
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                    <div className="service-card">
+
+                        <div className="service-icon">
+                            🔒
+                        </div>
+
+                        <div>
+
+                            <h5>Secure Payment</h5>
+
+                            <p>
+                                100% protected checkout
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                    <div className="service-card">
+
+                        <div className="service-icon">
+                            🔄
+                        </div>
+
+                        <div>
+
+                            <h5>Easy Returns</h5>
+
+                            <p>
+                                Hassle-free return policy
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                    <div className="service-card">
+
+                        <div className="service-icon">
+                            🤖
+                        </div>
+
+                        <div>
+
+                            <h5>AI Recommended</h5>
+
+                            <p>
+                                Suggested based on shopping trends
+                            </p>
 
                         </div>
 
@@ -191,81 +381,58 @@ function ProductDetails() {
 
                 </div>
 
-                <hr className="my-5" />
+            </div>
 
-                <h3 className="mb-4">
+        </div>
 
-                    Recommended Products
+        <div className="recommendation-section">
 
-                </h3>
+    <div className="section-header">
 
-                <div className="row">
+        <h2>Recommended Products</h2>
 
-                    {
+        <p>You may also like these products</p>
 
-                        recommendations.length === 0 ?
+    </div>
 
-                        <h5>No recommendations available.</h5>
+    <div className="recommendation-grid">
 
-                        :
+        {
+            recommendations.length === 0 ?
 
-                        recommendations.map((item) => (
+                <div className="no-products">
 
-                            <div
-                                className="col-md-3 mb-4"
-                                key={item.id}
-                            >
+                    <h3>No Recommendations Available</h3>
 
-                                <div className="card h-100 shadow">
-
-                                    <img
-                                        src={`http://127.0.0.1:8000/uploads/${item.image}`}
-                                        alt={item.product_name}
-                                        className="card-img-top"
-                                        style={{
-                                            height: "220px",
-                                            objectFit: "cover"
-                                        }}
-                                    />
-
-                                    <div className="card-body text-center">
-
-                                        <h5>
-
-                                            {item.product_name}
-
-                                        </h5>
-
-                                        <p className="text-success">
-
-                                            ₹{item.price}
-
-                                        </p>
-
-                                        <span className="badge bg-secondary">
-
-                                            {item.category}
-
-                                        </span>
-
-                                    </div>
-
-                                </div>
-
-                            </div>
-
-                        ))
-
-                    }
+                    <p>
+                        We'll recommend products based on your shopping history.
+                    </p>
 
                 </div>
 
-            </div>
+            :
 
-        </>
+                recommendations.map((item) => (
 
-    );
+                    <ProductCard
+                        key={item.id}
+                        product={item}
+                    />
+
+                ))
+        }
+
+    </div>
+
+</div>
+
+</div>
+
+</>
+
+);
 
 }
 
 export default ProductDetails;
+            

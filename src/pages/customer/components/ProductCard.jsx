@@ -1,167 +1,174 @@
 import { Link } from "react-router-dom";
 import axios from "axios";
+import {
+  FiHeart,
+  FiShoppingCart,
+  FiEye,
+  FiCheckCircle,
+  FiXCircle,
+} from "react-icons/fi";
+
+import "../../../styles/ProductCard.css";
 
 function ProductCard({ product }) {
-
   const customerId = localStorage.getItem("customer_id");
 
-  // Add to Cart
   const addToCart = () => {
-
     if (!customerId) {
       alert("Please login first.");
       return;
     }
 
-    axios.post("http://127.0.0.1:8000/cart/add", {
-      customer_id: Number(customerId),
-      product_id: product.id,
-      quantity: 1,
-    })
-    .then(() => {
-      alert("Product added to cart.");
-    })
-    .catch((err) => {
-      console.log(err);
-      alert("Failed to add product to cart.");
-    });
-
+    axios
+      .post("http://127.0.0.1:8000/cart/add", {
+        customer_id: Number(customerId),
+        product_id: product.id,
+        quantity: 1,
+      })
+      .then(() => {
+        alert("Product added to cart.");
+      })
+      .catch((err) => {
+        console.log(err);
+        alert("Failed to add product to cart.");
+      });
   };
 
-  // Add to Wishlist
   const addToWishlist = () => {
-
     if (!customerId) {
       alert("Please login first.");
       return;
     }
 
-    axios.post("http://127.0.0.1:8000/wishlist/add", {
-      customer_id: Number(customerId),
-      product_id: product.id,
-    })
-    .then(() => {
-      alert("Added to wishlist.");
-    })
-    .catch((err) => {
-      console.log(err);
-      alert("Unable to add to wishlist.");
-    });
-
+    axios
+      .post("http://127.0.0.1:8000/wishlist/add", {
+        customer_id: Number(customerId),
+        product_id: product.id,
+      })
+      .then(() => {
+        alert("Added to wishlist.");
+      })
+      .catch((err) => {
+        console.log(err);
+        alert("Unable to add to wishlist.");
+      });
   };
 
   return (
-    <div className="col-lg-3 col-md-4 col-sm-6 mb-4">
+    <div className="shop-product-card">
+      {/* IMAGE */}
 
-      <div
-        className="card h-100 shadow-sm border-0"
-        style={{ borderRadius: "12px" }}
-      >
-
-        {/* Product Image */}
+      <div className="shop-product-image-wrapper">
         <img
           src={`http://127.0.0.1:8000/uploads/${product.image}`}
-          className="card-img-top"
           alt={product.product_name}
-          style={{
-            height: "230px",
-            objectFit: "cover",
-            borderTopLeftRadius: "12px",
-            borderTopRightRadius: "12px",
-          }}
+          className="shop-product-image"
         />
 
-        <div className="card-body">
+        <span className="shop-product-category">
+          {product.category}
+        </span>
 
-          {/* Category */}
-          <span className="badge bg-secondary mb-2">
-            {product.category}
-          </span>
+        <button
+          className="shop-product-heart"
+          onClick={addToWishlist}
+          title="Add to Wishlist"
+        >
+          <FiHeart />
+        </button>
 
-          {/* Product Name */}
-          <h5 className="fw-bold">
-            {product.product_name}
-          </h5>
-
-          {/* Description */}
-          <p
-            className="text-muted"
-            style={{
-              height: "48px",
-              overflow: "hidden",
-            }}
-          >
-            {product.description}
-          </p>
-
-          {/* Rating (Temporary) */}
-          <div className="mb-2">
-            ⭐⭐⭐⭐☆
-            <small className="text-muted ms-2">
-              (4.5)
-            </small>
-          </div>
-
-          {/* Price */}
-          <div className="mb-2">
-
-            <span
-              className="text-decoration-line-through text-secondary"
-            >
-              ₹{product.original_price}
-            </span>
-
-            <span className="badge bg-danger ms-2">
-              {product.discount}% OFF
-            </span>
-
-          </div>
-
-          <h4 className="text-success fw-bold">
-            ₹{product.price}
-          </h4>
-
-          {/* Stock */}
-          {product.stock > 0 ? (
-            <p className="text-success fw-bold">
-              ✔ In Stock ({product.stock})
-            </p>
-          ) : (
-            <p className="text-danger fw-bold">
-              Out of Stock
-            </p>
-          )}
-
-        </div>
-
-        <div className="card-footer bg-white border-0">
-
-          <Link
-            to={`/customer/product/${product.id}`}
-            className="btn btn-primary w-100 mb-2"
-          >
-            View Details
-          </Link>
-
-          <button
-            className="btn btn-success w-100 mb-2"
-            onClick={addToCart}
-            disabled={product.stock <= 0}
-          >
-            🛒 Add to Cart
-          </button>
-
-          <button
-            className="btn btn-outline-danger w-100"
-            onClick={addToWishlist}
-          >
-            ❤ Add to Wishlist
-          </button>
-
-        </div>
-
+        <span className="shop-product-discount">
+          {product.discount}% OFF
+        </span>
       </div>
 
+      {/* CONTENT */}
+
+      <div className="shop-product-content">
+        <h3 className="shop-product-name">
+          {product.product_name}
+        </h3>
+
+        <p className="shop-product-description">
+          {product.description}
+        </p>
+
+        {/* Rating */}
+
+        <div
+          style={{
+            color: "#ffc107",
+            fontSize: "15px",
+            marginBottom: "12px",
+          }}
+        >
+          ★★★★☆
+          <span
+            style={{
+              color: "#777",
+              marginLeft: "8px",
+            }}
+          >
+            (4.5)
+          </span>
+        </div>
+
+        {/* PRICE */}
+
+        <div className="shop-product-price-row">
+          <span className="shop-product-price">
+            ₹{product.price}
+          </span>
+
+          <span className="shop-product-original-price">
+            ₹{product.original_price}
+          </span>
+        </div>
+
+        {/* STOCK */}
+
+        <div
+          className={`shop-product-stock ${
+            product.stock > 0
+              ? "shop-in-stock"
+              : "shop-out-stock"
+          }`}
+        >
+          {product.stock > 0 ? (
+            <>
+              <FiCheckCircle />
+              In Stock
+              <small>({product.stock})</small>
+            </>
+          ) : (
+            <>
+              <FiXCircle />
+              Out of Stock
+            </>
+          )}
+        </div>
+      </div>
+
+      {/* ACTIONS */}
+
+      <div className="shop-product-actions">
+        <button
+          className="shop-add-cart"
+          onClick={addToCart}
+          disabled={product.stock <= 0}
+        >
+          <FiShoppingCart />
+          Add to Cart
+        </button>
+
+        <Link
+          to={`/customer/product/${product.id}`}
+          className="shop-view-product"
+          title="View Details"
+        >
+          <FiEye />
+        </Link>
+      </div>
     </div>
   );
 }

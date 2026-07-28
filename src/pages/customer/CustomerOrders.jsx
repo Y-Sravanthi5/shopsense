@@ -1,119 +1,125 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 import CustomerNavbar from "./components/CustomerNavbar";
+import "../../styles/orders.css";
 
 function CustomerOrders() {
+  const customerId = localStorage.getItem("customer_id");
 
-    const customerId = localStorage.getItem("customer_id");
+  const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-    const [orders, setOrders] = useState([]);
+  const navigate = useNavigate();
 
-    useEffect(() => {
-        loadOrders();
-    }, []);
+  useEffect(() => {
+    loadOrders();
+  }, []);
 
-    const loadOrders = () => {
+  const loadOrders = () => {
+    axios
+      .get(`http://127.0.0.1:8000/orders/${customerId}`)
+      .then((res) => {
+        setOrders(res.data);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.log(err);
+        setLoading(false);
+      });
+  };
 
-        axios
-            .get(`http://127.0.0.1:8000/orders/${customerId}`)
-            .then((res) => {
-                setOrders(res.data);
-            })
-            .catch((err) => console.log(err));
+  const badgeClass = (status) => {
+    if (!status) return "processing";
 
-    };
+    const s = status.toLowerCase();
 
-    return (
+    if (s.includes("deliver")) return "delivered";
+    if (s.includes("ship")) return "shipped";
+    if (s.includes("cancel")) return "cancelled";
 
-        <>
-            <CustomerNavbar />
+    return "processing";
+  };
 
-            <div className="container mt-4">
+  return (
+    <>
+      <CustomerNavbar />
 
-                <h2 className="mb-4">
-                    My Orders
-                </h2>
+      <div className="orders-page">
 
-                {
-                    orders.length === 0 ?
+        <div className="orders-header">
+          <div>
+            <h2>My Orders</h2>
+            <p>Track and manage your purchases.</p>
+          </div>
 
-                        <div className="alert alert-info">
+          <div className="order-count">
+            {orders.length} Orders
+          </div>
+        </div>
 
-                            No Orders Found
+        {loading ? (
+          <div className="loading-card">
+            Loading orders...
+          </div>
+        ) : orders.length === 0 ? (
+          <div className="empty-orders">
+            <div className="empty-icon">📦</div>
+            <h3>No Orders Yet</h3>
+            <p>Your purchases will appear here.</p>
+          </div>
+        ) : (
+          orders.map((order) => (
+            <div className="order-card" key={order.id}>
 
-                        </div>
+              <div className="order-left">
 
-                    :
+                <div className="order-icon">
+                  📦
+                </div>
 
-                    orders.map((order) => (
+                <div className="order-info">
 
-                        <div
-                            className="card mb-3 shadow"
-                            key={order.id}
-                        >
+                  <h4>Order #{order.id}</h4>
 
-                            <div className="card-body">
+                  <p>
+                    Ordered on{" "}
+                    {new Date(order.created_at).toLocaleString()}
+                  </p>
 
-                                <h5>
+                  <div className="payment">
+                    💳 {order.payment_method}
+                  </div>
 
-                                    Order ID :
-                                    {" "}
-                                    {order.id}
+                </div>
 
-                                </h5>
+              </div>
 
-                                <h6>
+              <div className="order-right">
 
-                                    Total :
-                                    {" "}
-                                    ₹{order.total_amount}
+                <h3>₹{order.total_amount}</h3>
 
-                                </h6>
+                <span className={`status ${badgeClass(order.order_status)}`}>
+                  {order.order_status}
+                </span>
 
-                                <p>
+                <button
+                  className="details-btn"
+                  onClick={() =>
+                    navigate(`/customer/order/${order.id}`)
+                  }
+                >
+                  View Details
+                </button>
 
-                                    Payment :
-                                    {" "}
-                                    {order.payment_method}
-
-                                </p>
-
-                                <p>
-
-    Status :
-    {" "}
-    {order.order_status}
-
-</p>
-
-<button
-    className="btn btn-primary"
-    onClick={() => window.location.href = `/customer/order/${order.id}`}
->
-    View Details
-</button>
-                                <p>
-
-                                    Date :
-                                    {" "}
-                                    {new Date(order.created_at).toLocaleString()}
-
-                                </p>
-
-                            </div>
-
-                        </div>
-
-                    ))
-
-                }
+              </div>
 
             </div>
-
-        </>
-
-    );
-
+          ))
+        )}
+      </div>
+    </>
+  );
 }
 
 export default CustomerOrders;
