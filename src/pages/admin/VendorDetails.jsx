@@ -1,195 +1,237 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
+
+import {
+  FiArrowLeft,
+  FiUser,
+  FiMail,
+  FiPhone,
+  FiHome,
+  FiTag,
+  FiBox,
+  FiCheckCircle,
+  FiFileText,
+} from "react-icons/fi";
+
 import AdminLayout from "../../components/layout/AdminLayout";
 import API from "../../services/api";
 
+import "../../styles/vendorDetails.css";
+
 function VendorDetails() {
+  const { id } = useParams();
+  const navigate = useNavigate();
 
-    const { id } = useParams();
+  const [vendor, setVendor] = useState(null);
+  const [productCount, setProductCount] = useState(0);
+  const [loading, setLoading] = useState(true);
 
-    const [vendor, setVendor] = useState(null);
-    const [productCount, setProductCount] = useState(0);
+  useEffect(() => {
+    loadVendor();
+  }, []);
 
-    useEffect(() => {
+  const loadVendor = async () => {
+    try {
+      setLoading(true);
 
-        loadVendor();
+      const vendorRes = await API.get(`/admin/vendor/${id}`);
+      setVendor(vendorRes.data);
 
-    }, []);
-
-    const loadVendor = async () => {
-
-        try {
-
-            const vendorRes = await API.get(
-                `/admin/vendor/${id}`
-            );
-
-            setVendor(vendorRes.data);
-
-            const productRes = await API.get(
-                `/admin/vendor-products/${id}`
-            );
-
-            setProductCount(productRes.data.count);
-
-        }
-
-        catch (err) {
-
-            console.log(err);
-
-        }
-
-    };
-
-    if (!vendor) {
-
-        return (
-
-            <AdminLayout>
-
-                <h3>Loading...</h3>
-
-            </AdminLayout>
-
-        );
-
+      const productRes = await API.get(`/admin/vendor-products/${id}`);
+      setProductCount(productRes.data.count);
+    } catch (err) {
+      console.log(err);
+      alert("Failed to load vendor details");
+    } finally {
+      setLoading(false);
     }
+  };
 
+  if (loading) {
     return (
+      <AdminLayout>
+        <div className="vendor-loading">
+          <div className="spinner-border text-primary"></div>
+          <p>Loading Vendor Details...</p>
+        </div>
+      </AdminLayout>
+    );
+  }
 
-        <AdminLayout>
+  if (!vendor) {
+    return (
+      <AdminLayout>
+        <div className="vendor-loading">
+          <h3>Vendor not found.</h3>
+        </div>
+      </AdminLayout>
+    );
+  }
 
-            <div className="container mt-4">
+  return (
+    <AdminLayout>
+      <div className="vendor-page">
 
-                <div className="card shadow">
+        {/* Hero */}
 
-                    <div className="card-body">
+        <div className="vendor-hero">
 
-                        <h2 className="mb-4">
+          <button
+            className="back-btn"
+            onClick={() => navigate(-1)}
+          >
+            <FiArrowLeft />
+            Back
+          </button>
 
-                            Vendor Details
+          <h1>🏪 Vendor Details</h1>
 
-                        </h2>
+          <p>
+            Complete profile and business information of the selected vendor.
+          </p>
 
-                        <div className="row">
+        </div>
 
-                            <div className="col-md-4 text-center">
+        {/* Top Section */}
 
-                                <img
+        <div className="vendor-top">
 
-                                    src={`http://127.0.0.1:8000/uploads/${vendor.shop_logo}`}
+          {/* Profile */}
 
-                                    alt="Shop Logo"
+          <div className="profile-card">
 
-                                    className="img-fluid rounded shadow"
+            <img
+              src={`http://127.0.0.1:8000/uploads/${vendor.shop_logo}`}
+              alt="Shop Logo"
+            />
 
-                                    style={{
-                                        width: "180px",
-                                        height: "180px",
-                                        objectFit: "cover"
-                                    }}
+            <h3>{vendor.business_name}</h3>
 
-                                />
+            <p>{vendor.owner_name}</p>
 
-                            </div>
+            <span
+              className={`status-badge ${
+                vendor.status === "Approved"
+                  ? "approved"
+                  : "pending"
+              }`}
+            >
+              {vendor.status}
+            </span>
 
-                            <div className="col-md-8">
+          </div>
 
-                                <table className="table">
+          {/* Stats */}
 
-                                    <tbody>
+          <div className="stats-card">
 
-                                        <tr>
+            <h4>Marketplace Statistics</h4>
 
-                                            <th>Business Name</th>
+            <div className="stat-box">
 
-                                            <td>{vendor.business_name}</td>
+              <FiBox />
 
-                                        </tr>
+              <div>
 
-                                        <tr>
+                <span>Total Products</span>
 
-                                            <th>Owner</th>
+                <h2>{productCount}</h2>
 
-                                            <td>{vendor.owner_name}</td>
-
-                                        </tr>
-
-                                        <tr>
-
-                                            <th>Email</th>
-
-                                            <td>{vendor.email}</td>
-
-                                        </tr>
-
-                                        <tr>
-
-                                            <th>Phone</th>
-
-                                            <td>{vendor.phone}</td>
-
-                                        </tr>
-
-                                        <tr>
-
-                                            <th>Business Type</th>
-
-                                            <td>{vendor.business_type}</td>
-
-                                        </tr>
-
-                                        <tr>
-
-                                            <th>Address</th>
-
-                                            <td>{vendor.address}</td>
-
-                                        </tr>
-
-                                        <tr>
-
-                                            <th>Description</th>
-
-                                            <td>{vendor.description}</td>
-
-                                        </tr>
-
-                                        <tr>
-
-                                            <th>Status</th>
-
-                                            <td>{vendor.status}</td>
-
-                                        </tr>
-
-                                        <tr>
-
-                                            <th>Products Uploaded</th>
-
-                                            <td>{productCount}</td>
-
-                                        </tr>
-
-                                    </tbody>
-
-                                </table>
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                </div>
+              </div>
 
             </div>
 
-        </AdminLayout>
+          </div>
 
-    );
+        </div>
 
+        {/* Details */}
+
+        <div className="details-card">
+
+          <h3>Business Information</h3>
+
+          <div className="details-grid">
+
+            <div className="detail-item">
+              <FiUser />
+              <div>
+                <span>Owner Name</span>
+                <strong>{vendor.owner_name}</strong>
+              </div>
+            </div>
+
+            <div className="detail-item">
+              <FiMail />
+              <div>
+                <span>Email</span>
+                <strong>{vendor.email}</strong>
+              </div>
+            </div>
+
+            <div className="detail-item">
+              <FiPhone />
+              <div>
+                <span>Phone</span>
+                <strong>{vendor.phone}</strong>
+              </div>
+            </div>
+
+            <div className="detail-item">
+              <FiTag />
+              <div>
+                <span>Business Type</span>
+                <strong>{vendor.business_type}</strong>
+              </div>
+            </div>
+
+            <div className="detail-item full">
+              <FiHome />
+              <div>
+                <span>Address</span>
+                <strong>{vendor.address}</strong>
+              </div>
+            </div>
+
+            <div className="detail-item full">
+              <FiFileText />
+              <div>
+                <span>Description</span>
+                <strong>{vendor.description}</strong>
+              </div>
+            </div>
+
+            <div className="detail-item">
+              <FiCheckCircle />
+              <div>
+                <span>Status</span>
+
+                <strong>
+
+                  <span
+                    className={`status-badge ${
+                      vendor.status === "Approved"
+                        ? "approved"
+                        : "pending"
+                    }`}
+                  >
+                    {vendor.status}
+                  </span>
+
+                </strong>
+
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </AdminLayout>
+  );
 }
 
 export default VendorDetails;

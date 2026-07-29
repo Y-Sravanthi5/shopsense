@@ -1,8 +1,22 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+
+import {
+    FiUsers,
+    FiUserCheck,
+    FiUserX,
+    FiClock,
+    FiPackage,
+    FiShoppingCart,
+    FiDollarSign,
+    FiPieChart
+} from "react-icons/fi";
+
 import AdminLayout from "../../components/layout/AdminLayout";
 import API from "../../services/api";
 import DashboardCharts from "./DashboardCharts";
+
+import "../../styles/adminDashboard.css";
 
 function AdminDashboard() {
 
@@ -39,89 +53,152 @@ function AdminDashboard() {
         {
             title: "Total Vendors",
             value: dashboard.total_vendors || 0,
-            color: "primary"
+            icon: <FiUsers />,
+            color: "purple"
         },
 
         {
             title: "Pending Vendors",
             value: dashboard.pending_vendors || 0,
-            color: "warning",
+            icon: <FiClock />,
+            color: "orange",
             path: "/admin/pending-vendors"
         },
 
         {
             title: "Approved Vendors",
             value: dashboard.approved_vendors || 0,
-            color: "success",
+            icon: <FiUserCheck />,
+            color: "green",
             path: "/admin/approved-vendors"
         },
 
         {
             title: "Rejected Vendors",
             value: dashboard.rejected_vendors || 0,
-            color: "danger",
+            icon: <FiUserX />,
+            color: "red",
             path: "/admin/rejected-vendors"
         },
 
         {
             title: "Customers",
             value: dashboard.total_customers || 0,
-            color: "info"
+            icon: <FiUsers />,
+            color: "blue"
         },
 
         {
             title: "Products",
             value: dashboard.total_products || 0,
-            color: "secondary"
+            icon: <FiPackage />,
+            color: "indigo"
         },
 
         {
             title: "Orders",
             value: dashboard.total_orders || 0,
-            color: "dark"
+            icon: <FiShoppingCart />,
+            color: "cyan"
         },
 
         {
-            title: "Revenue",
-            value: "₹" + (dashboard.total_revenue || 0),
-            color: "success"
-        },
-        {
-    title: "Customer Segmentation",
-    value: "View",
-    color: "primary",
-    path: "/admin/customer-segmentation"
+    title: "Revenue",
+    value: `₹${Number(dashboard.total_revenue || 0).toLocaleString("en-IN", {
+        maximumFractionDigits: 0
+    })}`,
+    icon: <FiDollarSign />,
+    color: "green"
 },
 
+       
     ];
 
     return (
 
         <AdminLayout>
 
-            <h2 className="mb-4">
+            <div className="admin-dashboard">
 
-                Admin Dashboard
+                {/* Hero */}
 
-            </h2>
+                <section className="dashboard-hero">
 
-            <div className="row">
+                    <div className="hero-left">
 
-                {
+                        <span className="dashboard-tag">
 
-                    cards.map((card, index) => (
+                            ShopSense Admin
 
-                        <div
-                            className="col-lg-3 col-md-6 mb-4"
-                            key={index}
-                        >
+                        </span>
+
+                        <h1>
+    Welcome Back, Admin 👋
+</h1>
+
+<p>
+    Here's what's happening across your marketplace today.
+    Monitor vendors, customers, orders, products and revenue
+    from one centralized dashboard.
+</p>
+
+                    </div>
+
+                    <div className="hero-right">
+
+                        <div className="hero-circle">
+
+                            <FiPieChart />
+
+                        </div>
+
+                    </div>
+
+                </section>
+                <div className="dashboard-summary">
+
+    <div>
+
+        <h3>
+
+            Marketplace Health
+
+        </h3>
+
+        <p>
+
+            All systems are running normally.
+
+        </p>
+
+    </div>
+
+    <div className="summary-badge">
+
+        Active Marketplace
+
+    </div>
+
+</div>
+
+                {/* Statistics */}
+
+                <section className="dashboard-grid">
+
+                    {
+
+                        cards.map((card, index) => (
 
                             <div
 
-                                className={`card border-${card.color} shadow h-100`}
+                                key={index}
+
+                                className="dashboard-card"
 
                                 style={{
-                                    cursor: card.path ? "pointer" : "default"
+                                    cursor: card.path
+                                        ? "pointer"
+                                        : "default"
                                 }}
 
                                 onClick={() => {
@@ -134,35 +211,53 @@ function AdminDashboard() {
 
                             >
 
-                                <div className="card-body text-center">
+                                <div className="dashboard-card-top">
 
-                                    <h5>
+                                    <div>
 
-                                        {card.title}
+                                        <p>
 
-                                    </h5>
+                                            {card.title}
 
-                                    <h2 className={`text-${card.color}`}>
+                                        </p>
 
-                                        {card.value}
+                                        <h2>
 
-                                    </h2>
+                                            {card.value}
+
+                                        </h2>
+
+                                    </div>
+
+                                    <div
+                                        className={`dashboard-icon ${card.color}`}
+                                    >
+
+                                        {card.icon}
+
+                                    </div>
 
                                 </div>
 
                             </div>
 
-                        </div>
+                        ))
 
-                    ))
+                    }
 
-                }
+                </section>
+
+                {/* Charts */}
+
+                <section className="dashboard-chart-section">
+
+                    <DashboardCharts dashboard={dashboard} />
+                    
+                    
+
+                </section>
 
             </div>
-
-            {/* Dashboard Charts */}
-
-            <DashboardCharts dashboard={dashboard} />
 
         </AdminLayout>
 

@@ -209,3 +209,122 @@
 
     cursor:pointer;
 }
+/* ===============================
+   Customer Dropdown
+================================ */
+
+.customer-user-dropdown{
+    position:relative;
+}
+
+.customer-user-btn{
+
+    display:flex;
+    align-items:center;
+    gap:8px;
+
+    padding:10px 16px;
+
+    background:#f4f1ff;
+
+    border:1px solid #ddd4ff;
+
+    border-radius:12px;
+
+    color:#5f46bd;
+
+    font-size:14px;
+
+    font-weight:600;
+
+    cursor:pointer;
+
+    transition:.25s;
+}
+
+.customer-user-btn strong{
+
+    color:#35295c;
+
+    margin-left:4px;
+}
+
+.customer-user-btn svg:last-child{
+
+    margin-left:4px;
+
+    font-size:15px;
+}
+
+.customer-user-btn:hover{
+
+    background:#ece6ff;
+}
+
+.customer-user-menu{
+
+    position:absolute;
+
+    top:115%;
+
+    right:0;
+
+    width:230px;
+
+    background:#ffffff;
+
+    border:1px solid #ebe9f1;
+
+    border-radius:14px;
+
+    box-shadow:0 16px 40px rgba(0,0,0,.12);
+
+    overflow:hidden;
+
+    opacity:0;
+
+    visibility:hidden;
+
+    transform:translateY(10px);
+
+    transition:.25s;
+
+    z-index:1000;
+}
+
+.customer-user-dropdown:hover .customer-user-menu{
+
+    opacity:1;
+
+    visibility:visible;
+
+    transform:translateY(0);
+}
+
+.customer-user-menu-item{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:12px;
+
+    padding:14px 18px;
+
+    color:#444;
+
+    text-decoration:none;
+
+    font-size:14px;
+
+    font-weight:500;
+
+    transition:.25s;
+}
+
+.customer-user-menu-item:hover{
+
+    background:#f5f2ff;
+
+    color:#7657e8;
+}

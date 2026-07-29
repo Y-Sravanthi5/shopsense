@@ -2599,3 +2599,166 @@ def marketplace_benchmark(db: Session, vendor_id: int):
         "leaderboard":
             leaderboard
     }
+from sqlalchemy import func
+import models
+
+from sqlalchemy import func
+from datetime import datetime
+import models
+
+
+def customer_dashboard_analytics(db, customer_id: int):
+
+    # -----------------------------
+    # Customer Orders
+    # -----------------------------
+    orders = (
+        db.query(models.Order)
+        .filter(models.Order.customer_id == customer_id)
+        .order_by(models.Order.created_at.desc())
+        .all()
+    )
+
+    total_orders = len(orders)
+
+    total_spent = sum(order.total_amount or 0 for order in orders)
+
+    average_order_value = (
+        round(total_spent / total_orders, 2)
+        if total_orders > 0
+        else 0
+    )
+
+    last_purchase_days = None
+
+    if orders:
+        last_purchase_days = (
+            datetime.utcnow() - orders[0].created_at
+        ).days
+
+    status = (
+        "Premium"
+        if total_spent >= 50000
+        else "Regular"
+        if total_spent >= 15000
+        else "New"
+    )
+
+    # -----------------------------
+    # Recent Purchases
+    # -----------------------------
+    recent_orders = (
+        db.query(
+            models.Product.product_name,
+            models.Product.category,
+            models.OrderItem.quantity,
+            models.OrderItem.price
+        )
+        .join(
+            models.OrderItem,
+            models.Product.id == models.OrderItem.product_id
+        )
+        .join(
+            models.Order,
+            models.Order.id == models.OrderItem.order_id
+        )
+        .filter(models.Order.customer_id == customer_id)
+        .order_by(models.Order.created_at.desc())
+        .limit(5)
+        .all()
+    )
+
+    recent = []
+
+    for item in recent_orders:
+        recent.append({
+            "product": item.product_name,
+            "category": item.category,
+            "amount": float(item.quantity * item.price)
+        })
+
+    # -----------------------------
+    # Monthly Spending
+    # -----------------------------
+    # -----------------------------
+# Monthly Spending
+# -----------------------------
+    monthly_data = (
+        db.query(
+            func.date_format(
+                models.Order.created_at,
+                "%Y-%m"
+            ).label("month"),
+            func.sum(
+                models.Order.total_amount
+            ).label("amount")
+        )
+        .filter(models.Order.customer_id == customer_id)
+        .group_by(
+            func.date_format(
+                models.Order.created_at,
+                "%Y-%m"
+            )
+        )
+        .order_by(
+            func.date_format(
+                models.Order.created_at,
+                "%Y-%m"
+            )
+        )
+        .all()
+    )
+
+    monthly_spending = []
+
+    for row in monthly_data:
+        monthly_spending.append({
+            "month": row.month,
+            "amount": float(row.amount)
+        })
+
+    # -----------------------------
+    # Category-wise Spending
+    # -----------------------------
+    category_data = (
+        db.query(
+            models.Product.category,
+            func.sum(
+                models.OrderItem.quantity *
+                models.OrderItem.price
+            ).label("amount")
+        )
+        .join(
+            models.OrderItem,
+            models.Product.id == models.OrderItem.product_id
+        )
+        .join(
+            models.Order,
+            models.Order.id == models.OrderItem.order_id
+        )
+        .filter(models.Order.customer_id == customer_id)
+        .group_by(models.Product.category)
+        .all()
+    )
+
+    category_spending = [
+        {
+            "category": row.category,
+            "amount": float(row.amount)
+        }
+        for row in category_data
+    ]
+
+    # -----------------------------
+    # Response
+    # -----------------------------
+    return {
+        "total_spent": round(total_spent, 2),
+        "total_orders": total_orders,
+        "average_order_value": average_order_value,
+        "last_purchase_days": last_purchase_days,
+        "status": status,
+        "recent_orders": recent,
+        "monthly_spending": monthly_spending,
+        "category_spending": category_spending
+    }

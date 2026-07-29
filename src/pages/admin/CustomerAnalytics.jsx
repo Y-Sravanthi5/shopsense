@@ -1,15 +1,22 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import {
+  FiRefreshCw,
+  FiSearch,
+  FiUsers,
+  FiShoppingBag,
+  FiDollarSign,
+  FiTrendingUp,
+} from "react-icons/fi";
 import AdminLayout from "../../components/layout/AdminLayout";
 import API from "../../services/api";
+import "../../styles/customerAnalytics.css";
 
 function CustomerAnalytics() {
   const [customers, setCustomers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [search, setSearch] = useState("");
 
-  // --------------------------------
-  // Load Customer Analytics
-  // --------------------------------
   useEffect(() => {
     loadCustomers();
   }, []);
@@ -20,22 +27,16 @@ function CustomerAnalytics() {
 
       const res = await API.get("/analytics/customers");
 
-      console.log("Customer Analytics Response:", res.data);
-
       setCustomers(res.data);
       setError("");
     } catch (err) {
-      console.error("Customer Analytics Error:", err);
-
+      console.error(err);
       setError("Unable to load customer analytics.");
     } finally {
       setLoading(false);
     }
   };
 
-  // --------------------------------
-  // Currency Formatter
-  // --------------------------------
   const formatMoney = (value) => {
     return Number(value || 0).toLocaleString("en-IN", {
       minimumFractionDigits: 2,
@@ -43,9 +44,17 @@ function CustomerAnalytics() {
     });
   };
 
-  // --------------------------------
-  // Summary Analytics
-  // --------------------------------
+  const filteredCustomers = useMemo(() => {
+    return customers.filter((customer) => {
+      const value = search.toLowerCase();
+
+      return (
+        customer.customer_name?.toLowerCase().includes(value) ||
+        customer.email?.toLowerCase().includes(value)
+      );
+    });
+  }, [customers, search]);
+
   const totalCustomers = customers.length;
 
   const activeCustomers = customers.filter(
@@ -53,280 +62,279 @@ function CustomerAnalytics() {
   ).length;
 
   const totalOrders = customers.reduce(
-    (sum, customer) =>
-      sum + Number(customer.total_orders || 0),
+    (sum, customer) => sum + Number(customer.total_orders || 0),
     0
   );
 
   const totalSpending = customers.reduce(
-    (sum, customer) =>
-      sum + Number(customer.total_spent || 0),
+    (sum, customer) => sum + Number(customer.total_spent || 0),
     0
   );
 
-  // --------------------------------
-  // Loading
-  // --------------------------------
-  if (loading) {
-    return (
-      <AdminLayout>
-        <div className="text-center mt-5">
-          <h4>Loading customer analytics...</h4>
-        </div>
-      </AdminLayout>
-    );
-  }
-
   return (
     <AdminLayout>
+      <div className="customer-page">
 
-      {/* Page Title */}
+        {/* Hero */}
 
-      <h2 className="mb-4 fw-bold">
-        👥 Customer Analytics
-      </h2>
+        <div className="customer-hero">
 
-      {/* Error */}
+          <div>
 
-      {error && (
-        <div className="alert alert-danger">
-          {error}
-        </div>
-      )}
+            <h1>Customer Analytics</h1>
 
-      {/* =====================================
-          SUMMARY CARDS
-      ====================================== */}
-
-      <div className="row g-4 mb-4">
-
-        {/* Total Customers */}
-
-        <div className="col-md-3">
-          <div className="card shadow-sm border-0 p-4 text-center h-100">
-
-            <h6 className="text-muted">
-              Total Customers
-            </h6>
-
-            <h2 className="mt-2 text-primary">
-              {totalCustomers}
-            </h2>
+            <p>
+              Monitor customer activity, purchasing behaviour and lifetime
+              value across your marketplace.
+            </p>
 
           </div>
+
+          <button
+            className="refresh-btn"
+            onClick={loadCustomers}
+          >
+            <FiRefreshCw />
+            Refresh
+          </button>
+
         </div>
 
-        {/* Active Customers */}
+        {error && (
+          <div className="error-box">
+            {error}
+          </div>
+        )}
 
-        <div className="col-md-3">
-          <div className="card shadow-sm border-0 p-4 text-center h-100">
+        {/* Summary */}
 
-            <h6 className="text-muted">
-              Active Customers
-            </h6>
+        <div className="summary-grid">
 
-            <h2 className="mt-2 text-success">
-              {activeCustomers}
-            </h2>
+          <div className="summary-card">
+
+            <div className="summary-icon blue">
+              <FiUsers />
+            </div>
+
+            <div>
+
+              <h4>Total Customers</h4>
+
+              <h2>{totalCustomers}</h2>
+
+            </div>
 
           </div>
-        </div>
 
-        {/* Total Orders */}
+          <div className="summary-card">
 
-        <div className="col-md-3">
-          <div className="card shadow-sm border-0 p-4 text-center h-100">
+            <div className="summary-icon green">
+              <FiTrendingUp />
+            </div>
 
-            <h6 className="text-muted">
-              Total Orders
-            </h6>
+            <div>
 
-            <h2 className="mt-2">
-              {totalOrders}
-            </h2>
+              <h4>Active Customers</h4>
 
-          </div>
-        </div>
+              <h2>{activeCustomers}</h2>
 
-        {/* Total Spending */}
-
-        <div className="col-md-3">
-          <div className="card shadow-sm border-0 p-4 text-center h-100">
-
-            <h6 className="text-muted">
-              Total Customer Spending
-            </h6>
-
-            <h3 className="mt-2 text-success">
-              ₹{formatMoney(totalSpending)}
-            </h3>
+            </div>
 
           </div>
+
+          <div className="summary-card">
+
+            <div className="summary-icon orange">
+              <FiShoppingBag />
+            </div>
+
+            <div>
+
+              <h4>Total Orders</h4>
+
+              <h2>{totalOrders}</h2>
+
+            </div>
+
+          </div>
+
+          <div className="summary-card">
+
+            <div className="summary-icon purple">
+              <FiDollarSign />
+            </div>
+
+            <div>
+
+              <h4>Total Spending</h4>
+
+              <h2>
+                ₹{formatMoney(totalSpending)}
+              </h2>
+
+            </div>
+
+          </div>
+
         </div>
 
-      </div>
+        {/* Toolbar */}
 
-      {/* =====================================
-          CUSTOMER PERFORMANCE TABLE
-      ====================================== */}
+        <div className="table-toolbar">
 
-      <div className="card shadow-sm border-0 p-4">
+          <div className="search-box">
 
-        <h4 className="mb-4">
-          📊 Customer Performance
-        </h4>
+            <FiSearch />
 
-        <div className="table-responsive">
+            <input
+              type="text"
+              placeholder="Search customers..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
 
-          <table className="table table-bordered table-hover align-middle">
+          </div>
 
-            <thead className="table-dark">
+        </div>
 
-              <tr>
-                <th>Customer</th>
-                <th>Email</th>
-                <th>Orders</th>
-                <th>Total Spending</th>
-                <th>Avg. Order Value</th>
-                <th>Customer Lifetime Value</th>
-                <th>Last Purchase</th>
-                <th>Status</th>
-              </tr>
+        {/* Table */}
 
-            </thead>
+        <div className="analytics-card">
 
-            <tbody>
+          {loading ? (
 
-              {customers.length === 0 ? (
+            <div className="loading-state">
+              Loading customer analytics...
+            </div>
 
-                <tr>
-                  <td
-                    colSpan="8"
-                    className="text-center text-muted"
-                  >
-                    No customer analytics available.
-                  </td>
-                </tr>
+          ) : filteredCustomers.length === 0 ? (
 
-              ) : (
+            <div className="empty-state">
 
-                customers.map((customer) => (
+              <h3>No Customers Found</h3>
 
-                  <tr key={customer.customer_id}>
+              <p>
+                Customer analytics will appear here once orders are placed.
+              </p>
 
-                    {/* Customer Name */}
+            </div>
 
-                    <td>
-                      <div className="fw-bold">
-                        {customer.customer_name || "N/A"}
-                      </div>
+          ) : (
 
-                      <small className="text-muted">
-                        ID: {customer.customer_id}
-                      </small>
-                    </td>
+            <div className="table-responsive">
 
-                    {/* Email */}
+              <table className="analytics-table">
 
-                    <td>
-                      {customer.email}
-                    </td>
+                <thead>
 
-                    {/* Orders */}
+                  <tr>
 
-                    <td className="text-center fw-bold">
-                      {customer.total_orders || 0}
-                    </td>
+                    <th>Customer</th>
 
-                    {/* Total Spending */}
+                    <th>Email</th>
 
-                    <td>
-                      ₹{formatMoney(customer.total_spent)}
-                    </td>
+                    <th>Orders</th>
 
-                    {/* Average Order Value */}
+                    <th>Total Spending</th>
 
-                    <td>
-                      ₹{formatMoney(
-                        customer.average_order_value
-                      )}
-                    </td>
+                    <th>Avg Order</th>
 
-                    {/* Customer Lifetime Value */}
+                    <th>Lifetime Value</th>
 
-                    <td className="fw-bold text-primary">
-                      ₹{formatMoney(
-                        customer.customer_lifetime_value
-                      )}
-                    </td>
+                    <th>Last Purchase</th>
 
-                    {/* Last Purchase */}
-
-                    <td>
-
-                      {customer.last_purchase_days === null ||
-                      customer.last_purchase_days === undefined ? (
-
-                        <span className="text-muted">
-                          No purchases
-                        </span>
-
-                      ) : customer.last_purchase_days === 0 ? (
-
-                        <span>
-                          Today
-                        </span>
-
-                      ) : customer.last_purchase_days === 1 ? (
-
-                        <span>
-                          1 day ago
-                        </span>
-
-                      ) : (
-
-                        <span>
-                          {customer.last_purchase_days} days ago
-                        </span>
-
-                      )}
-
-                    </td>
-
-                    {/* Status */}
-
-                    <td>
-
-                      {customer.status === "Active" ? (
-
-                        <span className="badge bg-success">
-                          Active
-                        </span>
-
-                      ) : (
-
-                        <span className="badge bg-secondary">
-                          Inactive
-                        </span>
-
-                      )}
-
-                    </td>
+                    <th>Status</th>
 
                   </tr>
 
-                ))
+                </thead>
 
-              )}
+                <tbody>
+                                      {filteredCustomers.map((customer) => (
+                    <tr key={customer.customer_id}>
+                      <td>
+                        <div className="customer-info">
+                          <div className="customer-avatar">
+                            {customer.customer_name
+                              ? customer.customer_name.charAt(0).toUpperCase()
+                              : "C"}
+                          </div>
 
-            </tbody>
+                          <div>
+                            <div className="customer-name">
+                              {customer.customer_name || "N/A"}
+                            </div>
 
-          </table>
+                            <small>
+                              ID: {customer.customer_id}
+                            </small>
+                          </div>
+                        </div>
+                      </td>
 
+                      <td>{customer.email}</td>
+
+                      <td>
+                        <span className="order-count">
+                          {customer.total_orders || 0}
+                        </span>
+                      </td>
+
+                      <td className="money">
+                        ₹{formatMoney(customer.total_spent)}
+                      </td>
+
+                      <td className="money">
+                        ₹
+                        {formatMoney(
+                          customer.average_order_value
+                        )}
+                      </td>
+
+                      <td className="money lifetime">
+                        ₹
+                        {formatMoney(
+                          customer.customer_lifetime_value
+                        )}
+                      </td>
+
+                      <td>
+                        {customer.last_purchase_days === null ||
+                        customer.last_purchase_days ===
+                          undefined ? (
+                          <span className="text-muted">
+                            No purchases
+                          </span>
+                        ) : customer.last_purchase_days ===
+                          0 ? (
+                          "Today"
+                        ) : customer.last_purchase_days ===
+                          1 ? (
+                          "1 day ago"
+                        ) : (
+                          `${customer.last_purchase_days} days ago`
+                        )}
+                      </td>
+
+                      <td>
+                        <span
+                          className={`status ${
+                            customer.status === "Active"
+                              ? "active"
+                              : "inactive"
+                          }`}
+                        >
+                          {customer.status}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
-
       </div>
-
     </AdminLayout>
   );
 }

@@ -1,248 +1,363 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import {
+  FiSearch,
+  FiRefreshCw,
+  FiClock,
+  FiEye,
+  FiCheck,
+  FiX
+} from "react-icons/fi";
+
 import AdminLayout from "../../components/layout/AdminLayout";
 import API from "../../services/api";
+import "../../styles/pendingVendors.css";
 
 function PendingVendors() {
 
-  const [vendors, setVendors] = useState([]);
-  const [loading, setLoading] = useState(true);
+    const [vendors, setVendors] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [search, setSearch] = useState("");
 
-  const navigate = useNavigate();
+    const navigate = useNavigate();
 
-  useEffect(() => {
-    fetchPendingVendors();
-  }, []);
+    useEffect(() => {
+        fetchPendingVendors();
+    }, []);
 
-  const fetchPendingVendors = async () => {
+    const fetchPendingVendors = async () => {
 
-    try {
+        try {
 
-      setLoading(true);
+            setLoading(true);
 
-      const res = await API.get("/admin/pending-vendors");
+            const res = await API.get("/admin/pending-vendors");
 
-      setVendors(res.data);
+            setVendors(res.data);
 
-    } catch (error) {
+        }
+        catch (error) {
 
-      console.log(error);
+            console.log(error);
 
-      alert("Failed to load pending vendors.");
+            alert("Failed to load pending vendors.");
 
-    } finally {
+        }
+        finally {
 
-      setLoading(false);
+            setLoading(false);
 
-    }
+        }
 
-  };
+    };
 
-  const approveVendor = async (id) => {
+    const approveVendor = async (id) => {
 
-    try {
+        try {
 
-      await API.put(`/admin/approve/${id}`);
+            await API.put(`/admin/approve/${id}`);
 
-      alert("Vendor Approved Successfully");
+            alert("Vendor Approved Successfully");
 
-      fetchPendingVendors();
+            fetchPendingVendors();
 
-    } catch (error) {
+        }
+        catch (error) {
 
-      console.log(error);
+            console.log(error);
 
-      alert("Approval Failed");
+            alert("Approval Failed");
 
-    }
+        }
 
-  };
+    };
 
-  const rejectVendor = async (id) => {
+    const rejectVendor = async (id) => {
 
-    try {
+        try {
 
-      await API.put(`/admin/reject/${id}`);
+            await API.put(`/admin/reject/${id}`);
 
-      alert("Vendor Rejected Successfully");
+            alert("Vendor Rejected Successfully");
 
-      fetchPendingVendors();
+            fetchPendingVendors();
 
-    } catch (error) {
+        }
+        catch (error) {
 
-      console.log(error);
+            console.log(error);
 
-      alert("Reject Failed");
+            alert("Reject Failed");
 
-    }
+        }
 
-  };
+    };
 
-  return (
+    const filteredVendors = useMemo(() => {
 
-    <AdminLayout>
+        return vendors.filter(v =>
 
-      <div className="container-fluid mt-4">
+            v.business_name.toLowerCase().includes(search.toLowerCase()) ||
 
-        <div className="d-flex justify-content-between align-items-center mb-4">
+            v.owner_name.toLowerCase().includes(search.toLowerCase()) ||
 
-          <div>
+            v.email.toLowerCase().includes(search.toLowerCase())
 
-            <h2 className="fw-bold">
-              Pending Vendor Approvals
-            </h2>
+        );
 
-            <p className="text-muted">
-              Total Pending Vendors : <b>{vendors.length}</b>
-            </p>
+    }, [vendors, search]);
 
-          </div>
+    return (
 
-          <button
-            className="btn btn-primary"
-            onClick={fetchPendingVendors}
-          >
-            Refresh
-          </button>
+        <AdminLayout>
 
-        </div>
+            <div className="pending-page">
 
-        <div className="card shadow border-0">
+                {/* Hero */}
 
-          <div className="card-body">
+                <div className="pending-hero">
 
-            {loading ? (
+                    <div>
 
-              <div className="text-center p-5">
+                        <h1>🕒 Pending Vendor Requests</h1>
 
-                <div
-                  className="spinner-border text-primary"
-                  role="status"
-                ></div>
+                        <p>
 
-              </div>
+                            Review vendor applications and approve or reject
+                            them before they join the ShopSense marketplace.
 
-            ) : (
+                        </p>
 
-              <table className="table table-hover table-bordered align-middle">
+                    </div>
 
-                <thead className="table-dark">
+                </div>
 
-                  <tr>
+                {/* Summary */}
 
-                    <th>ID</th>
+                <div className="pending-summary">
 
-                    <th>Business Name</th>
+                    <div className="summary-card">
 
-                    <th>Owner</th>
+                        <div className="summary-icon">
 
-                    <th>Email</th>
+                            <FiClock />
 
-                    <th>Phone</th>
+                        </div>
 
-                    <th>Status</th>
+                        <div>
 
-                    <th width="260">
-                      Actions
-                    </th>
+                            <span>Pending Vendors</span>
 
-                  </tr>
+                            <h2>{vendors.length}</h2>
 
-                </thead>
+                        </div>
 
-                <tbody>
+                    </div>
 
-                  {vendors.length === 0 ? (
+                </div>
 
-                    <tr>
+                {/* Toolbar */}
 
-                      <td
-                        colSpan="7"
-                        className="text-center"
-                      >
-                        No Pending Vendors Found
-                      </td>
+                <div className="pending-toolbar">
 
-                    </tr>
+                    <div className="search-box">
 
-                  ) : (
+                        <FiSearch />
 
-                    vendors.map((vendor) => (
+                        <input
 
-                      <tr key={vendor.id}>
+                            type="text"
 
-                        <td>{vendor.id}</td>
+                            placeholder="Search vendor..."
 
-                        <td>{vendor.business_name}</td>
+                            value={search}
 
-                        <td>{vendor.owner_name}</td>
+                            onChange={(e) => setSearch(e.target.value)}
 
-                        <td>{vendor.email}</td>
+                        />
 
-                        <td>{vendor.phone}</td>
+                    </div>
 
-                        <td>
+                    <button
 
-                          <span className="badge bg-warning text-dark">
+                        className="refresh-btn"
 
-                            {vendor.status}
+                        onClick={fetchPendingVendors}
 
-                          </span>
+                    >
 
-                        </td>
+                        <FiRefreshCw />
 
-                        <td>
+                        Refresh
 
-                          <button
-                            className="btn btn-info btn-sm me-2"
-                            onClick={() =>
-                              navigate(`/admin/vendor/${vendor.id}`)
-                            }
-                          >
-                            View
-                          </button>
+                    </button>
 
-                          <button
-                            className="btn btn-success btn-sm me-2"
-                            onClick={() =>
-                              approveVendor(vendor.id)
-                            }
-                          >
-                            Approve
-                          </button>
+                </div>
 
-                          <button
-                            className="btn btn-danger btn-sm"
-                            onClick={() =>
-                              rejectVendor(vendor.id)
-                            }
-                          >
-                            Reject
-                          </button>
+                {/* Table */}
 
-                        </td>
+                <div className="pending-table-card">
 
-                      </tr>
+                    {loading ? (
 
-                    ))
+                        <div className="loading-area">
 
-                  )}
+                            <div
+                                className="spinner-border text-primary"
+                                role="status"
+                            ></div>
 
-                </tbody>
+                            <p>
 
-              </table>
+                                Loading pending vendors...
 
-            )}
+                            </p>
 
-          </div>
+                        </div>
 
-        </div>
+                    ) : filteredVendors.length === 0 ? (
 
-      </div>
+                        <div className="empty-state">
 
-    </AdminLayout>
+                            <h2>🎉</h2>
 
-  );
+                            <h4>No Pending Vendor Requests</h4>
+
+                            <p>
+
+                                All vendor applications have been reviewed.
+
+                            </p>
+
+                        </div>
+
+                    ) : (
+
+                        <table className="pending-table">
+
+                            <thead>
+
+                                <tr>
+
+                                    <th>ID</th>
+
+                                    <th>Business</th>
+
+                                    <th>Owner</th>
+
+                                    <th>Email</th>
+
+                                    <th>Phone</th>
+
+                                    <th>Status</th>
+
+                                    <th>Actions</th>
+
+                                </tr>
+
+                            </thead>
+
+                            <tbody>
+
+                                {filteredVendors.map((vendor) => (
+
+                                    <tr key={vendor.id}>
+
+                                        <td>{vendor.id}</td>
+
+                                        <td>
+
+                                            <strong>
+
+                                                {vendor.business_name}
+
+                                            </strong>
+
+                                        </td>
+
+                                        <td>{vendor.owner_name}</td>
+
+                                        <td>{vendor.email}</td>
+
+                                        <td>{vendor.phone}</td>
+
+                                        <td>
+
+                                            <span className="status pending">
+
+                                                {vendor.status}
+
+                                            </span>
+
+                                        </td>
+
+                                        <td>
+
+                                            <div className="action-buttons">
+
+                                                <button
+
+                                                    className="view-btn"
+
+                                                    onClick={() =>
+                                                        navigate(`/admin/vendor/${vendor.id}`)
+                                                    }
+
+                                                >
+
+                                                    <FiEye />
+
+                                                </button>
+
+                                                <button
+
+                                                    className="approve-btn"
+
+                                                    onClick={() =>
+                                                        approveVendor(vendor.id)
+                                                    }
+
+                                                >
+
+                                                    <FiCheck />
+
+                                                </button>
+
+                                                <button
+
+                                                    className="reject-btn"
+
+                                                    onClick={() =>
+                                                        rejectVendor(vendor.id)
+                                                    }
+
+                                                >
+
+                                                    <FiX />
+
+                                                </button>
+
+                                            </div>
+
+                                        </td>
+
+                                    </tr>
+
+                                ))}
+
+                            </tbody>
+
+                        </table>
+
+                    )}
+
+                </div>
+
+            </div>
+
+        </AdminLayout>
+
+    );
 
 }
 

@@ -1,0 +1,162 @@
+.topbar{
+
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    background:#fff;
+    padding:22px 30px;
+    border-radius:18px;
+    box-shadow:0 8px 24px rgba(0,0,0,.06);
+    margin-bottom:30px;
+
+}
+
+.topbar-left h2{
+
+    margin:0;
+    font-size:28px;
+    font-weight:700;
+    color:#111827;
+
+}
+
+.topbar-left p{
+
+    margin:6px 0 0;
+    color:#6B7280;
+    font-size:14px;
+
+}
+
+.search-box{
+
+    width:360px;
+    display:flex;
+    align-items:center;
+    gap:12px;
+    background:#F9FAFB;
+    border:1px solid #E5E7EB;
+    border-radius:14px;
+    padding:12px 18px;
+
+}
+
+.search-icon{
+
+    color:#9CA3AF;
+
+}
+
+.search-box input{
+
+    border:none;
+    outline:none;
+    width:100%;
+    background:transparent;
+    font-size:15px;
+
+}
+
+.topbar-right{
+
+    display:flex;
+    align-items:center;
+    gap:22px;
+
+}
+
+.notification-btn{
+
+    position:relative;
+    width:46px;
+    height:46px;
+    border:none;
+    border-radius:14px;
+    background:#F3F4F6;
+    color:#4B5563;
+    cursor:pointer;
+    transition:.3s;
+
+}
+
+.notification-btn:hover{
+
+    background:#EEF2FF;
+    color:#4F46E5;
+
+}
+
+.notification-btn span{
+
+    position:absolute;
+    top:-5px;
+    right:-5px;
+    width:22px;
+    height:22px;
+    border-radius:50%;
+    background:#EF4444;
+    color:white;
+    font-size:11px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-weight:600;
+
+}
+
+.profile-card{
+
+    display:flex;
+    align-items:center;
+    gap:12px;
+
+}
+
+.profile-icon{
+
+    font-size:42px;
+    color:#4F46E5;
+
+}
+
+.profile-card h5{
+
+    margin:0;
+    font-size:15px;
+    color:#111827;
+
+}
+
+.profile-card small{
+
+    color:#6B7280;
+
+}
+
+@media(max-width:992px){
+
+    .search-box{
+
+        display:none;
+
+    }
+
+}
+.logout-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 18px;
+  border: none;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #7c3aed, #8b5cf6);
+  color: #fff;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.logout-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px rgba(124, 58, 237, 0.3);
+}

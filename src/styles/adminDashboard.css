@@ -1,0 +1,264 @@
+/* =========================
+   Dashboard
+========================= */
+
+.admin-dashboard{
+    padding:20px;
+    display:flex;
+    flex-direction:column;
+    gap:35px;
+}
+
+/* =========================
+   Hero
+========================= */
+
+.dashboard-hero{
+    background:linear-gradient(135deg,#6C63FF,#8B5CF6);
+    color:#fff;
+    border-radius:24px;
+    padding:40px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    overflow:hidden;
+    position:relative;
+    box-shadow:0 15px 35px rgba(108,99,255,.25);
+}
+
+.dashboard-hero::before{
+    content:"";
+    position:absolute;
+    width:280px;
+    height:280px;
+    background:rgba(255,255,255,.08);
+    border-radius:50%;
+    right:-80px;
+    top:-80px;
+}
+
+.hero-left{
+    z-index:2;
+}
+
+.dashboard-tag{
+    display:inline-block;
+    background:rgba(255,255,255,.18);
+    padding:8px 18px;
+    border-radius:30px;
+    font-size:14px;
+    margin-bottom:18px;
+    backdrop-filter:blur(8px);
+}
+
+.hero-left h1{
+    font-size:38px;
+    margin-bottom:12px;
+    font-weight:700;
+}
+
+.hero-left p{
+    max-width:620px;
+    opacity:.9;
+    line-height:1.7;
+    margin:0;
+}
+
+.hero-right{
+    z-index:2;
+}
+
+.hero-circle{
+    width:120px;
+    height:120px;
+    background:rgba(255,255,255,.18);
+    border-radius:50%;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    font-size:52px;
+    backdrop-filter:blur(10px);
+}
+
+/* =========================
+   Cards
+========================= */
+
+.dashboard-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+    gap:24px;
+}
+
+.dashboard-card{
+    background:#fff;
+    border-radius:20px;
+    padding:24px;
+    transition:.3s;
+    box-shadow:0 8px 25px rgba(0,0,0,.06);
+}
+
+.dashboard-card:hover{
+    transform:translateY(-8px);
+    box-shadow:0 18px 35px rgba(0,0,0,.12);
+}
+
+.dashboard-card-top{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+.dashboard-card p{
+    color:#7a7a7a;
+    margin:0;
+    font-size:15px;
+}
+
+.dashboard-card h2{
+    margin-top:12px;
+    font-size:34px;
+    color:#1F2937;
+    font-weight:700;
+}
+
+/* =========================
+   Icons
+========================= */
+
+.dashboard-icon{
+    width:62px;
+    height:62px;
+    border-radius:18px;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    font-size:28px;
+    color:#fff;
+}
+
+.dashboard-icon.purple{
+    background:#7C3AED;
+}
+
+.dashboard-icon.orange{
+    background:#F59E0B;
+}
+
+.dashboard-icon.green{
+    background:#10B981;
+}
+
+.dashboard-icon.red{
+    background:#EF4444;
+}
+
+.dashboard-icon.blue{
+    background:#3B82F6;
+}
+
+.dashboard-icon.indigo{
+    background:#6366F1;
+}
+
+.dashboard-icon.cyan{
+    background:#06B6D4;
+}
+
+/* =========================
+   Charts
+========================= */
+
+.dashboard-chart-section{
+    background:#fff;
+    padding:25px;
+    border-radius:20px;
+    box-shadow:0 8px 25px rgba(0,0,0,.06);
+}
+
+/* =========================
+   Responsive
+========================= */
+
+@media(max-width:992px){
+
+.dashboard-hero{
+    flex-direction:column;
+    align-items:flex-start;
+    gap:30px;
+}
+
+.hero-circle{
+    width:90px;
+    height:90px;
+    font-size:40px;
+}
+
+.hero-left h1{
+    font-size:30px;
+}
+
+}
+
+@media(max-width:768px){
+
+.admin-dashboard{
+    padding:10px;
+}
+
+.dashboard-grid{
+    grid-template-columns:1fr;
+}
+
+.dashboard-card h2{
+    font-size:28px;
+}
+
+}
+.dashboard-summary{
+
+    background:#ffffff;
+
+    padding:20px 30px;
+
+    border-radius:18px;
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    box-shadow:0 8px 20px rgba(0,0,0,.06);
+
+}
+
+.dashboard-summary h3{
+
+    margin:0;
+
+    color:#1F2937;
+
+}
+
+.dashboard-summary p{
+
+    margin:6px 0 0;
+
+    color:#6B7280;
+
+}
+
+.summary-badge{
+
+    background:#DCFCE7;
+
+    color:#16A34A;
+
+    padding:10px 18px;
+
+    border-radius:30px;
+
+    font-weight:600;
+
+}

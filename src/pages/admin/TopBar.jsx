@@ -1,108 +1,97 @@
-import { FaBell, FaUserCircle, FaSearch } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
+import {
+  FaBell,
+  FaUserCircle,
+  FaSearch,
+  FaSignOutAlt,
+} from "react-icons/fa";
+
+import "../../styles/topbar.css";
 
 function Topbar() {
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    const confirmLogout = window.confirm(
+      "Are you sure you want to logout?"
+    );
+
+    if (!confirmLogout) return;
+
+    localStorage.removeItem("token");
+    localStorage.removeItem("role");
+    localStorage.removeItem("user");
+
+    navigate("/login");
+  };
 
   return (
-
-    <div
-      className="d-flex justify-content-between align-items-center bg-white shadow-sm px-4 py-3 mb-4"
-      style={{
-        borderRadius: "15px"
-      }}
-    >
+    <header className="topbar">
 
       {/* Left */}
 
-      <div
-        className="d-flex align-items-center"
-      >
+      <div className="topbar-left">
 
-        <h3
-          className="fw-bold mb-0"
-        >
-          Admin Dashboard
-        </h3>
+        <h2>Admin Dashboard</h2>
+
+        <p>
+          Welcome back! Manage your marketplace efficiently.
+        </p>
 
       </div>
 
       {/* Search */}
 
-      <div
-        className="d-flex align-items-center"
-        style={{
-          width: "350px"
-        }}
-      >
+      <div className="search-box">
 
-        <div
-          className="input-group"
-        >
+        <FaSearch className="search-icon" />
 
-          <span className="input-group-text bg-white">
-
-            <FaSearch />
-
-          </span>
-
-          <input
-            type="text"
-            className="form-control"
-            placeholder="Search..."
-          />
-
-        </div>
+        <input
+          type="text"
+          placeholder="Search products, vendors..."
+        />
 
       </div>
 
       {/* Right */}
 
-      <div
-        className="d-flex align-items-center"
-      >
+      <div className="topbar-right">
 
-        <button
-          className="btn btn-light position-relative me-3"
-        >
+        <button className="notification-btn">
 
           <FaBell />
 
-          <span
-            className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
-          >
-
-            3
-
-          </span>
+          <span>3</span>
 
         </button>
 
-        <FaUserCircle
-          size={40}
-          color="#4F46E5"
-        />
+        <div className="profile-card">
 
-        <div className="ms-3">
+          <FaUserCircle className="profile-icon" />
 
-          <div
-            className="fw-bold"
-          >
-            Administrator
+          <div>
+
+            <h5>Administrator</h5>
+
+            <small>admin@shopsense.com</small>
+
           </div>
-
-          <small
-            className="text-muted"
-          >
-            admin@shopsense.com
-          </small>
 
         </div>
 
+        <button
+          className="logout-btn"
+          onClick={handleLogout}
+        >
+          <FaSignOutAlt />
+
+          Logout
+        </button>
+
       </div>
 
-    </div>
-
+    </header>
   );
-
 }
 
 export default Topbar;

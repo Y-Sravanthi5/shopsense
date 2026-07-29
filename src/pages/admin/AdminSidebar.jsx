@@ -1,55 +1,86 @@
-import { Link, useLocation } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
+import {
+    FiGrid,
+    FiClock,
+    FiCheckCircle,
+    FiXCircle,
+    FiUsers,
+    FiPieChart,
+    FiTrendingUp,
+    FiBarChart2,
+    FiShoppingBag,
+    FiLogOut
+} from "react-icons/fi";
+
+import "../../styles/adminSidebar.css";
 
 function AdminSidebar() {
 
-    const location = useLocation();
+    const navigate = useNavigate();
+
+    const handleLogout = () => {
+
+        const confirmLogout = window.confirm(
+            "Are you sure you want to logout?"
+        );
+
+        if (!confirmLogout) return;
+
+        localStorage.removeItem("token");
+        localStorage.removeItem("role");
+        localStorage.removeItem("user");
+
+        navigate("/login");
+
+    };
 
     const menu = [
 
         {
             name: "Dashboard",
-            icon: "📊",
+            icon: <FiGrid />,
             path: "/admin/dashboard"
         },
 
         {
             name: "Pending Vendors",
-            icon: "⏳",
+            icon: <FiClock />,
             path: "/admin/pending-vendors"
         },
 
         {
             name: "Approved Vendors",
-            icon: "✅",
+            icon: <FiCheckCircle />,
             path: "/admin/approved-vendors"
         },
 
         {
             name: "Rejected Vendors",
-            icon: "❌",
+            icon: <FiXCircle />,
             path: "/admin/rejected-vendors"
         },
 
         {
             name: "Customer Analytics",
-            icon: "👥",
+            icon: <FiUsers />,
             path: "/admin/customer-analytics"
         },
+
         {
-    name: "Customer Segmentation",
-    icon: "🧩",
-    path: "/admin/customer-segmentation"
-},
+            name: "Customer Segmentation",
+            icon: <FiPieChart />,
+            path: "/admin/customer-segmentation"
+        },
 
         {
             name: "Sales Report",
-            icon: "📈",
+            icon: <FiTrendingUp />,
             path: "/admin/sales"
         },
 
         {
             name: "Sales Forecast",
-            icon: "📉",
+            icon: <FiBarChart2 />,
             path: "/admin/sales-forecast"
         }
 
@@ -57,86 +88,92 @@ function AdminSidebar() {
 
     return (
 
-        <div
-            style={{
-                width: "250px",
-                background: "#1E1B4B",
-                color: "white",
-                minHeight: "100vh",
-                padding: "25px",
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "space-between"
-            }}
-        >
+        <aside className="admin-sidebar">
 
             <div>
 
-                <h2 className="fw-bold mb-5">
-                    🛍 ShopSense
-                </h2>
+                <div className="sidebar-header">
 
-                {
+                    <div className="logo-circle">
 
-                    menu.map((item) => (
+                        <FiShoppingBag />
 
-                        <Link
-                            key={item.path}
-                            to={item.path}
-                            style={{
-                                textDecoration: "none"
-                            }}
-                        >
+                    </div>
 
-                            <div
-                                style={{
-                                    padding: "14px",
-                                    borderRadius: "12px",
-                                    marginBottom: "10px",
-                                    color: "white",
-                                    background:
-                                        location.pathname === item.path
-                                            ? "#4F46E5"
-                                            : "transparent"
-                                }}
+                    <div>
+
+                        <h2>ShopSense</h2>
+
+                        <p>Admin Panel</p>
+
+                    </div>
+
+                </div>
+
+                <nav>
+
+                    {
+
+                        menu.map(item => (
+
+                            <NavLink
+                                key={item.path}
+                                to={item.path}
+                                className={({ isActive }) =>
+                                    isActive
+                                        ? "sidebar-link active"
+                                        : "sidebar-link"
+                                }
                             >
 
-                                <span
-                                    style={{
-                                        marginRight: "12px"
-                                    }}
-                                >
-                                    {item.icon}
-                                </span>
+                                {item.icon}
 
-                                {item.name}
+                                <span>{item.name}</span>
 
-                            </div>
+                            </NavLink>
 
-                        </Link>
+                        ))
 
-                    ))
+                    }
 
-                }
+                </nav>
 
             </div>
 
-            <div
-                style={{
-                    borderTop: "1px solid rgba(255,255,255,0.3)",
-                    paddingTop: "15px"
-                }}
-            >
+            <div>
 
-                <h6>Administrator</h6>
+                <div className="sidebar-footer">
 
-                <small>
-                    admin@shopsense.com
-                </small>
+                    <div className="admin-avatar">
+
+                        A
+
+                    </div>
+
+                    <div>
+
+                        <h4>Administrator</h4>
+
+                        <p>admin@shopsense.com</p>
+
+                    </div>
+
+                </div>
+
+                <button
+                    className="sidebar-logout"
+                    onClick={handleLogout}
+                >
+
+                    <FiLogOut />
+
+                    <span>Logout</span>
+
+                </button>
 
             </div>
 
-        </div>
+        </aside>
 
     );
 

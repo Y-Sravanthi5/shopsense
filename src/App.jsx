@@ -51,6 +51,7 @@ import AdvancedRevenueAnalytics
 import MarketplaceBenchmark
   from "./pages/vendor/MarketplaceBenchmark";
 
+import CustomerSpendingAnalytics from "./pages/customer/cAnalytics";
 function App() {
   return (
     <BrowserRouter>
@@ -212,6 +213,11 @@ element={<Checkout />}
 <Route
   path="/vendor/marketplace-benchmark"
   element={<MarketplaceBenchmark />}
+/>
+
+<Route
+    path="/customer/analytics"
+    element={<CustomerSpendingAnalytics />}
 />
 
 

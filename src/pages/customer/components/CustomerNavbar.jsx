@@ -4,7 +4,8 @@ import {
     FiHeart,
     FiPackage,
     FiShoppingCart,
-    FiLogOut
+    FiLogOut,
+    FiBarChart2
 } from "react-icons/fi";
 
 import "../../../styles/customerNavbar.css";
@@ -20,22 +21,17 @@ function CustomerNavbar() {
     const isActive = (path) => location.pathname.startsWith(path);
 
     const handleLogout = () => {
-
         localStorage.removeItem("customer_id");
         localStorage.removeItem("customer_name");
-
         navigate("/");
-
     };
 
     return (
-
         <nav className="customer-navbar">
 
             <div className="customer-nav-container">
 
                 {/* Logo */}
-
                 <Link
                     to="/customer/products"
                     className="customer-logo"
@@ -45,7 +41,6 @@ function CustomerNavbar() {
                 </Link>
 
                 {/* Navigation */}
-
                 <div className="customer-nav-links">
 
                     <Link
@@ -80,14 +75,21 @@ function CustomerNavbar() {
                         <span>Cart</span>
                     </Link>
 
-                    {/* Greeting */}
+                    {/* Analytics */}
+                    <Link
+                        to="/customer/analytics"
+                        className={isActive("/customer/analytics") ? "nav-btn active" : "nav-btn"}
+                    >
+                        <FiBarChart2 />
+                        <span>Analytics</span>
+                    </Link>
 
+                    {/* Greeting */}
                     <div className="customer-user">
                         👋 Hi, <strong>{customerName}</strong>
                     </div>
 
                     {/* Logout */}
-
                     <button
                         className="logout-btn"
                         onClick={handleLogout}
@@ -101,9 +103,7 @@ function CustomerNavbar() {
             </div>
 
         </nav>
-
     );
-
 }
 
 export default CustomerNavbar;

@@ -1,207 +1,295 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import {
+  FiRefreshCw,
+  FiSearch,
+  FiUsers,
+  FiStar,
+  FiTrendingUp,
+  FiDollarSign,
+} from "react-icons/fi";
 import AdminLayout from "../../components/layout/AdminLayout";
 import API from "../../services/api";
+import "../../styles/customerSegmentation.css";
 
 function CustomerSegmentation() {
+  const [customers, setCustomers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
 
-    const [customers, setCustomers] = useState([]);
+  useEffect(() => {
+    loadSegmentation();
+  }, []);
 
-    useEffect(() => {
+  const loadSegmentation = async () => {
+    try {
+      setLoading(true);
 
-        loadSegmentation();
+      const res = await API.get("/admin/customer-segmentation");
 
-    }, []);
+      setCustomers(res.data);
+    } catch (err) {
+      console.log(err);
+      alert("Failed to load customer segmentation.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    const loadSegmentation = async () => {
+  const filteredCustomers = useMemo(() => {
+    return customers.filter((customer) => {
+      const value = search.toLowerCase();
 
-        try {
+      return (
+        customer.customer_name?.toLowerCase().includes(value) ||
+        customer.segment?.toLowerCase().includes(value)
+      );
+    });
+  }, [customers, search]);
 
-            const res = await API.get("/admin/customer-segmentation");
+  const premium = customers.filter(
+    (c) => c.segment === "Premium"
+  ).length;
 
-            setCustomers(res.data);
+  const regular = customers.filter(
+    (c) => c.segment === "Regular"
+  ).length;
 
-        }
+  const occasional = customers.filter(
+    (c) => c.segment === "Occasional"
+  ).length;
 
-        catch (err) {
+  const totalRevenue = customers.reduce(
+    (sum, c) => sum + Number(c.monetary || 0),
+    0
+  );
 
-            console.log(err);
+  return (
+    <AdminLayout>
+      <div className="segment-page">
 
-        }
+        {/* Hero */}
 
-    };
+        <div className="segment-hero">
 
-    return (
+          <div>
 
-        <AdminLayout>
+            <h1>Customer Segmentation</h1>
 
-            <h2 className="mb-4">
+            <p>
+              Analyze customer purchasing behaviour and classify users
+              into meaningful business segments.
+            </p>
 
-                Customer Segmentation
+          </div>
 
-            </h2>
+          <button
+            className="refresh-btn"
+            onClick={loadSegmentation}
+          >
+            <FiRefreshCw />
+            Refresh
+          </button>
 
-            <div className="card shadow">
+        </div>
 
-                <div className="card-body">
+        {/* Summary */}
 
-                    <table className="table table-bordered table-hover text-center align-middle">
+        <div className="summary-grid">
 
-                        <thead className="table-dark">
+          <div className="summary-card">
 
-                            <tr>
+            <div className="summary-icon purple">
+              <FiUsers />
+            </div>
 
-                                <th>ID</th>
+            <div>
 
-                                <th>Customer Name</th>
+              <h4>Total Customers</h4>
 
-                                <th>Orders</th>
-
-                                <th>Total Spent</th>
-
-                                <th>Last Purchase (Days)</th>
-
-                                <th>Segment</th>
-
-                            </tr>
-
-                        </thead>
-
-                        <tbody>
-
-                            {
-
-                                customers.length === 0 ?
-
-                                    (
-
-                                        <tr>
-
-                                            <td colSpan="6">
-
-                                                No Customer Data Found
-
-                                            </td>
-
-                                        </tr>
-
-                                    )
-
-                                    :
-
-                                    customers.map((customer) => (
-
-                                        <tr key={customer.customer_id}>
-
-                                            <td>
-
-                                                {customer.customer_id}
-
-                                            </td>
-
-                                            <td>
-
-                                                {customer.customer_name}
-
-                                            </td>
-
-                                            <td>
-
-                                                {customer.frequency}
-
-                                            </td>
-
-                                            <td>
-
-                                                ₹ {customer.monetary}
-
-                                            </td>
-
-                                            <td>
-
-                                                {
-
-                                                    customer.recency_days === null
-
-                                                        ?
-
-                                                        "-"
-
-                                                        :
-
-                                                        customer.recency_days
-
-                                                }
-
-                                            </td>
-
-                                            <td>
-
-                                                {
-
-                                                    customer.segment === "Premium"
-
-                                                        ?
-
-                                                        <span className="badge bg-success">
-
-                                                            Premium
-
-                                                        </span>
-
-                                                        :
-
-                                                        customer.segment === "Regular"
-
-                                                            ?
-
-                                                            <span className="badge bg-primary">
-
-                                                                Regular
-
-                                                            </span>
-
-                                                            :
-
-                                                            customer.segment === "Occasional"
-
-                                                                ?
-
-                                                                <span className="badge bg-warning text-dark">
-
-                                                                    Occasional
-
-                                                                </span>
-
-                                                                :
-
-                                                                <span className="badge bg-secondary">
-
-                                                                    New
-
-                                                                </span>
-
-                                                }
-
-                                            </td>
-
-                                        </tr>
-
-                                    ))
-
-                            }
-
-                        </tbody>
-
-                    </table>
-
-                </div>
+              <h2>{customers.length}</h2>
 
             </div>
 
-        </AdminLayout>
+          </div>
 
-    );
+          <div className="summary-card">
 
+            <div className="summary-icon green">
+              <FiStar />
+            </div>
+
+            <div>
+
+              <h4>Premium</h4>
+
+              <h2>{premium}</h2>
+
+            </div>
+
+          </div>
+
+          <div className="summary-card">
+
+            <div className="summary-icon blue">
+              <FiTrendingUp />
+            </div>
+
+            <div>
+
+              <h4>Regular</h4>
+
+              <h2>{regular}</h2>
+
+            </div>
+
+          </div>
+
+          <div className="summary-card">
+
+            <div className="summary-icon orange">
+              <FiDollarSign />
+            </div>
+
+            <div>
+
+              <h4>Total Spending</h4>
+
+              <h2>₹{totalRevenue.toLocaleString()}</h2>
+
+            </div>
+
+          </div>
+
+        </div>
+
+        {/* Toolbar */}
+
+        <div className="table-toolbar">
+
+          <div className="search-box">
+
+            <FiSearch />
+
+            <input
+              type="text"
+              placeholder="Search customers..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+
+          </div>
+
+        </div>
+
+        {/* Table */}
+
+        <div className="segment-card">
+
+          {loading ? (
+
+            <div className="loading-state">
+              Loading customer segmentation...
+            </div>
+
+          ) : filteredCustomers.length === 0 ? (
+
+            <div className="empty-state">
+
+              <h3>No Customer Data Found</h3>
+
+              <p>No segmentation data available.</p>
+
+            </div>
+
+          ) : (
+
+            <div className="table-responsive">
+
+              <table className="segment-table">
+
+                <thead>
+
+                  <tr>
+
+                    <th>Customer</th>
+
+                    <th>Orders</th>
+
+                    <th>Total Spent</th>
+
+                    <th>Last Purchase</th>
+
+                    <th>Segment</th>
+
+                  </tr>
+
+                </thead>
+
+                <tbody>
+                                      {filteredCustomers.map((customer) => (
+                    <tr key={customer.customer_id}>
+                      <td>
+                        <div className="customer-info">
+                          <div className="customer-avatar">
+                            {customer.customer_name
+                              ? customer.customer_name
+                                  .charAt(0)
+                                  .toUpperCase()
+                              : "C"}
+                          </div>
+
+                          <div>
+                            <div className="customer-name">
+                              {customer.customer_name}
+                            </div>
+
+                            <small>
+                              ID: {customer.customer_id}
+                            </small>
+                          </div>
+                        </div>
+                      </td>
+
+                      <td>
+                        <span className="orders-badge">
+                          {customer.frequency}
+                        </span>
+                      </td>
+
+                      <td className="money">
+                        ₹
+                        {Number(
+                          customer.monetary || 0
+                        ).toLocaleString()}
+                      </td>
+
+                      <td>
+                        {customer.recency_days === null
+                          ? "—"
+                          : customer.recency_days === 0
+                          ? "Today"
+                          : customer.recency_days === 1
+                          ? "1 day ago"
+                          : `${customer.recency_days} days ago`}
+                      </td>
+
+                      <td>
+                        <span
+                          className={`segment-badge ${customer.segment.toLowerCase()}`}
+                        >
+                          {customer.segment}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      </div>
+    </AdminLayout>
+  );
 }
 
 export default CustomerSegmentation;

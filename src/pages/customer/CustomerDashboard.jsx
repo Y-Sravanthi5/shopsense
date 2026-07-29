@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-
+import { BarChart3 } from "lucide-react";
 import {
   Store,
   ShoppingBag,
@@ -18,6 +18,8 @@ import {
 } from "lucide-react";
 
 import "../../styles/customerDashboard.css";
+import { GrOrderedList } from "react-icons/gr";
+import { CgProductHunt } from "react-icons/cg";
 
 function CustomerDashboard() {
   const customerName =
@@ -97,6 +99,7 @@ function CustomerDashboard() {
         <nav className="customer-nav-links">
 
           <Link to="/customer/products">
+          <Store size={18}/>
             Products
           </Link>
 
@@ -111,8 +114,13 @@ function CustomerDashboard() {
           </Link>
 
           <Link to="/customer/orders">
+          <ShoppingBag size={18}/>
             Orders
           </Link>
+          <Link to="/customer/analytics" className="nav-link">
+    <BarChart3 size={18} />
+    <span>Analytics</span>
+</Link>
 
         </nav>
 
