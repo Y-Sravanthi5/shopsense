@@ -150,6 +150,7 @@ class Wishlist(Base):
 # -----------------------------
 # Order Table
 # -----------------------------
+
 class Order(Base):
     __tablename__ = "orders"
 
